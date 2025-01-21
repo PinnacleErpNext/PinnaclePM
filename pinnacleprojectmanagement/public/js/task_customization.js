@@ -37,7 +37,7 @@ frappe.ui.form.AssignToDialog = class CustomAssignToDialog extends (
         get_data: function (txt) {
           return new Promise((resolve) => {
             frappe.call({
-              method: "pinnacle.api.updateUserList",
+              method: "pinnacleprojectmanagement.api.updateUserList",
               args: {
                 proj: cur_frm.doc.project,
                 search_text: txt, // Optionally pass user input to filter results
