@@ -25,24 +25,53 @@ def send_comment_notification(doc, method):
     if doc.reference_doctype == "Task":
         # Fetch the Task document
         task = frappe.get_doc("Task", doc.reference_name)
+        owner = task.owner
+
+        # Fetch the list of assignees
+        assignees = frappe.get_all(
+            "ToDo",
+            filters={
+                "reference_type": "Task",
+                "reference_name": task.name,
+                "status": "Open"  # Optional: Only fetch open assignments
+            },
+            fields=["allocated_to"]  # Fetch the assigned users
+        )
+        assignee_emails = [
+            frappe.get_value("User", assignee["allocated_to"], "email") for assignee in assignees
+        ]
         # Retrieve the list of followers
         followers = [follower.user for follower in  task.custom_follwers]
+    
         # Prepare the notification message
         subject = f"New comment on Task: {task.name}"
         message = f"""
         <p>A new comment has been added to Task <b>{task.name}</b> by {doc.owner}.</p>
+        Project: {task.project}
+        Task: {task.subject}
         <p>Comment:</p>
         <p>{doc.content}</p>
         """
-        # Send email notifications to all followers
-        for user in followers:
-            recipient_email = frappe.get_value("User", user, "email")
-            if recipient_email:
+
+        # Combine unique recipients (owner, followers, and assignees)
+        recipient_emails = list(
+            set(
+                [frappe.get_value("User", owner, "email")]  # Task owner's email
+                + assignee_emails
+                + followers
+            )
+        )
+        print(recipient_emails)
+        
+        # Send email notifications
+        for email in recipient_emails:
+            if email:
                 frappe.sendmail(
-                    recipients=[recipient_email],
+                    recipients=[email],
                     subject=subject,
                     message=message
                 )
+
 
 @frappe.whitelist(allow_guest=True)
 def get_all_nodes(doctype, parent_field, parent_value=None):
