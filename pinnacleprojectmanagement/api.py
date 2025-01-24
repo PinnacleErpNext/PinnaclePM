@@ -47,11 +47,12 @@ def send_comment_notification(doc, method):
         subject = f"New comment on Task: {task.name}"
         message = f"""
         <p>A new comment has been added to Task <b>{task.name}</b> by {doc.owner}.</p>
-        Project: {task.project}
-        Task: {task.subject}
+        <p>Project: {task.project}</p>
+        <p>Task: {task.subject}</p>
         <p>Comment:</p>
         <p>{doc.content}</p>
         """
+
 
         # Combine unique recipients (owner, followers, and assignees)
         recipient_emails = list(
