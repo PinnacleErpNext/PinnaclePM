@@ -41,7 +41,7 @@ def send_comment_notification(doc, method):
             frappe.get_value("User", assignee["allocated_to"], "email") for assignee in assignees
         ]
         # Retrieve the list of followers
-        followers = [follower.user for follower in  task.custom_follwers]
+        followers = [follower.user for follower in  task.custom_followers]
     
         # Prepare the notification message
         subject = f"New comment on Task: {task.name}"
