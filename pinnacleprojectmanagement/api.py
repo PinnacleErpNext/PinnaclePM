@@ -1,22 +1,39 @@
 import frappe
 
 @frappe.whitelist(allow_guest=True)
-def updateUserList(proj,search_text=None):
-    
+def updateUserList(proj, search_text=None):
     filters = {}
-    
+
     # Optional: Filter based on search_text
     if search_text:
         filters["name"] = ["like", f"%{search_text}%"]
 
-    # Execute the SQL query
+    # Execute the SQL query to get user permissions
     query = """
         SELECT user 
         FROM `tabUser Permission` 
         WHERE `for_value` = %s
     """
     user_permissions = frappe.db.sql(query, proj, as_dict=True)
-    return user_permissions
+
+    # Extract the email list from user permissions
+    email_list = [item['user'] for item in user_permissions]
+
+    # Fetch users from the database
+    users = frappe.db.get_list(
+        'User',
+        filters={
+            'name': ['in', email_list]
+        },
+        fields=['name', 'full_name']  # Include both email (name) and full_name
+    )
+
+    # Create a key-value pair of email and full name
+    assignee = {user['name']: user['full_name'] for user in users}
+
+    # Return the dictionary
+    return assignee
+
 
 #process to send comment notification
 from frappe.core.doctype.comment.comment import Comment

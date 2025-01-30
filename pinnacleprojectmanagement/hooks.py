@@ -150,6 +150,9 @@ doc_events = {
 	# }
     "Comment":{
         "after_insert":"pinnacleprojectmanagement.api.send_comment_notification"
+    },
+    "Task": {
+        "on_update": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.on_update"
     }
 }
 

@@ -102,9 +102,17 @@ frappe.ui.form.AssignToDialog = class CustomAssignToDialog extends (
   }
 };
 
-frappe.ui.form.on('Task', {
-	refresh(frm) {
-	    frm.set_df_property("status","options",['Open','Working','Pending Review','Overdue','Completed','Cancelled',"Can't Reproduce"])
-	    frm.set_df_property("is_template","hidden",true)
-	}
-})
+frappe.ui.form.on("Task", {
+  refresh(frm) {
+    frm.set_df_property("status", "options", [
+      "Open",
+      "Working",
+      "Pending Review",
+      "Overdue",
+      "Completed",
+      "Cancelled",
+      "Can't Reproduce",
+    ]);
+    frm.set_df_property("is_template", "hidden", true);
+  },
+});
