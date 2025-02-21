@@ -6,7 +6,7 @@ app_email = "satish@mytaxcafe.com"
 app_license = "mit"
 
 
-before_migrate = "pinnacleprojectmanagement.api.after_migrate"
+before_migrate = "pinnacleprojectmanagement.utils.after_migrate"
 
 
 # Apps

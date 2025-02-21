@@ -59,28 +59,3 @@ def get_all_nodes(doctype, parent_field, parent_value=None):
     )
 
     return child_projects + tasks
-
-@frappe.whitelist(allow_guest=True)
-def after_migrate():
-    parent_doctype = "Task"
-    fieldname_to_update = "status"  
-
-    # Define the new options
-    new_options = ['Backlog','Open', 'Working', 'Pending Review', 'Overdue', 'Completed', 'Cancelled', "Can't Reproduce"]
-
-    # Convert the list to a newline-separated string
-    options_string = "\n".join(new_options)
-
-    # Update the options for the specified field
-    frappe.db.set_value(
-        "DocField",
-        {"parent": parent_doctype, "fieldname": fieldname_to_update},
-        "options",
-        options_string
-    )
-
-    # Commit the changes to the database
-    frappe.db.commit()
-
-    # Log a success message
-    frappe.logger().info(f"Options updated for field '{fieldname_to_update}' in parent '{parent_doctype}'.")
