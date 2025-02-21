@@ -1,0 +1,77 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"ke55atSK11\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Project Management</span>\",\"col\":12}},{\"id\":\"qm2_YQRnkt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Projects\",\"col\":4}},{\"id\":\"WGH2zZFmms\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tasks\",\"col\":4}},{\"id\":\"mnWhQOBh5E\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Modules\",\"col\":4}},{\"id\":\"V17H4GKtC6\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Backlog\",\"col\":3}}]",
+ "creation": "2025-02-14 11:42:03.572882",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "projects",
+ "idx": 1,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Project Management",
+ "links": [],
+ "modified": "2025-02-17 18:58:23.883150",
+ "modified_by": "Administrator",
+ "module": "Pinnacle Project Management",
+ "name": "Project Management",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "Projects",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "Administrator"
+  },
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Projects Manager"
+  },
+  {
+   "role": "Projects User"
+  },
+  {
+   "role": "Backlog Manager"
+  }
+ ],
+ "sequence_id": 23.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "icon": "",
+   "label": "Projects",
+   "link_to": "Project List",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Modules",
+   "link_to": "Modules List",
+   "stats_filter": "[]",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Backlog",
+   "link_to": "Task List",
+   "stats_filter": "[[\"Task\",\"status\",\"=\",\"Backlog\",false]]",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Tasks",
+   "link_to": "Task List",
+   "type": "Report"
+  }
+ ],
+ "title": "Project Management"
+}

@@ -8,6 +8,7 @@ app_license = "mit"
 
 before_migrate = "pinnacleprojectmanagement.api.after_migrate"
 
+
 # Apps
 # ------------------
 
@@ -29,7 +30,10 @@ before_migrate = "pinnacleprojectmanagement.api.after_migrate"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/pinnacleprojectmanagement/css/pinnacleprojectmanagement.css"
-# app_include_js = "/assets/pinnacleprojectmanagement/js/pinnacleprojectmanagement.js"
+app_include_js = [
+    # "/assets/pinnacleprojectmanagement/js/pinnacleprojectmanagement.js,"
+    "/assets/pinnacleprojectmanagement/js/breadcrumbs_manager.js"
+    ]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/pinnacleprojectmanagement/css/pinnacleprojectmanagement.css"
@@ -149,10 +153,16 @@ doc_events = {
 	# 	"on_trash": "method"
 	# }
     "Comment":{
-        "after_insert":"pinnacleprojectmanagement.api.send_comment_notification"
+        "after_insert":"pinnacleprojectmanagement.pinnacle_project_management.custom_notifications.comment_notification"
     },
     "Task": {
-        "on_update": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.on_update"
+        "on_update": "pinnacleprojectmanagement.pinnacle_project_management.custom_notifications.task_followers",
+        "on_update": "pinnacleprojectmanagement.pinnacle_project_management.allottment.task_allottment",
+        "after_insert": "pinnacleprojectmanagement.pinnacle_project_management.allottment.task_allottment",
+    },
+    "Project": {
+        "after_insert": "pinnacleprojectmanagement.pinnacle_project_management.allottment.project_allottment",
+        "on_update": "pinnacleprojectmanagement.pinnacle_project_management.allottment.project_allottment"
     }
 }
 

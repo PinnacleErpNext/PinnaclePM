@@ -1,8 +1,10 @@
 import frappe
 from frappe import _
 from frappe.utils import get_url_to_form
+from frappe.core.doctype.comment.comment import Comment
 
-def on_update(doc, method):
+# Notification on removal and addition of followers in task
+def task_followers(doc, method):
     # Extract unique identifiers (e.g., email addresses) from current followers
     current_followers = {follower.user for follower in (doc.custom_followers or []) if follower.user}
 
@@ -69,3 +71,56 @@ def on_update(doc, method):
         """
         frappe.sendmail(recipients=recipients, subject=subject, message=message)
 
+#Send comment notification whenever a new comment is added to task
+def comment_notification(doc, method):
+    # Check if the comment is related to a Task
+    if doc.reference_doctype == "Task":
+        # Fetch the Task document
+        task = frappe.get_doc("Task", doc.reference_name)
+        owner = task.owner
+
+        # Fetch the list of assignees
+        assignees = frappe.get_all(
+            "ToDo",
+            filters={
+                "reference_type": "Task",
+                "reference_name": task.name,
+                "status": "Open"  # Optional: Only fetch open assignments
+            },
+            fields=["allocated_to"]  # Fetch the assigned users
+        )
+        assignee_emails = [
+            frappe.get_value("User", assignee["allocated_to"], "email") for assignee in assignees
+        ]
+        # Retrieve the list of followers
+        followers = [follower.user for follower in  task.custom_followers]
+    
+        # Prepare the notification message
+        subject = f"New comment on Task: {task.name}"
+        message = f"""
+        <p>A new comment has been added to Task <b>{task.name}</b> by {doc.owner}.</p>
+        <p>Project: {task.project}</p>
+        <p>Task: {task.subject}</p>
+        <p>Comment:</p>
+        <p>{doc.content}</p>
+        """
+
+
+        # Combine unique recipients (owner, followers, and assignees)
+        recipient_emails = list(
+            set(
+                [frappe.get_value("User", owner, "email")]  # Task owner's email
+                + assignee_emails
+                + followers
+            )
+        )
+        print(recipient_emails)
+        
+        # Send email notifications
+        for email in recipient_emails:
+            if email:
+                frappe.sendmail(
+                    recipients=[email],
+                    subject=subject,
+                    message=message
+                )

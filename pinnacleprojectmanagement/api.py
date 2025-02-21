@@ -35,62 +35,6 @@ def updateUserList(proj, search_text=None):
     return assignee
 
 
-#process to send comment notification
-from frappe.core.doctype.comment.comment import Comment
-def send_comment_notification(doc, method):
-    # Check if the comment is related to a Task
-    if doc.reference_doctype == "Task":
-        # Fetch the Task document
-        task = frappe.get_doc("Task", doc.reference_name)
-        owner = task.owner
-
-        # Fetch the list of assignees
-        assignees = frappe.get_all(
-            "ToDo",
-            filters={
-                "reference_type": "Task",
-                "reference_name": task.name,
-                "status": "Open"  # Optional: Only fetch open assignments
-            },
-            fields=["allocated_to"]  # Fetch the assigned users
-        )
-        assignee_emails = [
-            frappe.get_value("User", assignee["allocated_to"], "email") for assignee in assignees
-        ]
-        # Retrieve the list of followers
-        followers = [follower.user for follower in  task.custom_followers]
-    
-        # Prepare the notification message
-        subject = f"New comment on Task: {task.name}"
-        message = f"""
-        <p>A new comment has been added to Task <b>{task.name}</b> by {doc.owner}.</p>
-        <p>Project: {task.project}</p>
-        <p>Task: {task.subject}</p>
-        <p>Comment:</p>
-        <p>{doc.content}</p>
-        """
-
-
-        # Combine unique recipients (owner, followers, and assignees)
-        recipient_emails = list(
-            set(
-                [frappe.get_value("User", owner, "email")]  # Task owner's email
-                + assignee_emails
-                + followers
-            )
-        )
-        print(recipient_emails)
-        
-        # Send email notifications
-        for email in recipient_emails:
-            if email:
-                frappe.sendmail(
-                    recipients=[email],
-                    subject=subject,
-                    message=message
-                )
-
-
 @frappe.whitelist(allow_guest=True)
 def get_all_nodes(doctype, parent_field, parent_value=None):
     """
@@ -122,7 +66,7 @@ def after_migrate():
     fieldname_to_update = "status"  
 
     # Define the new options
-    new_options = ['Open', 'Working', 'Pending Review', 'Overdue', 'Completed', 'Cancelled', "Can't Reproduce"]
+    new_options = ['Backlog','Open', 'Working', 'Pending Review', 'Overdue', 'Completed', 'Cancelled', "Can't Reproduce"]
 
     # Convert the list to a newline-separated string
     options_string = "\n".join(new_options)
