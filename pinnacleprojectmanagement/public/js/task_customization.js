@@ -151,7 +151,6 @@ frappe.ui.form.on("Task", {
 
       // Make fields read-only
       frm.set_df_property("status", "read_only", true);
-      frm.set_df_property("custom_assigned_to", "read_only", true);
     }
 
     // Set default status properly
