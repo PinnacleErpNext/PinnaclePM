@@ -208,38 +208,4 @@ frappe.ui.form.on("Task", {
       frm.refresh();
     }
   },
-
-  after_save: function (frm) {
-    frappe.show_alert({ message: "Task Saved!", indicator: "green" });
-
-    // Redirect to Task List (Query Report)
-    frappe.set_route("query-report", "Task List");
-    if (frm.doc.custom_tag && frm.doc.custom_tag.length > 0) {
-      let tag = frm.doc.custom_tag;
-      frappe.call({
-        method: "frappe.client.insert",
-        args: {
-          doc: {
-            doctype: "Tag Link",
-            document_type: "Task",
-            document_name: frm.doc.name,
-            tag: tag,
-            title: frm.doc.subject,
-            parent: frm.doc.name,
-            parenttype: "Task",
-            parentfield: "_user_tags",
-          },
-        },
-        callback: function (response) {
-          if (!response.exc) {
-            frappe.msgprint(
-              __("Tag Link {0} created successfully.", [response.message.name])
-            );
-          } else {
-            console.error("Error creating Tag Link:", response.exc);
-          }
-        },
-      });
-    }
-  },
 });
