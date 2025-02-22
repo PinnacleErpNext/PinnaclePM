@@ -90,22 +90,20 @@ def get_data(filters):
         conditions.append("project = %(project)s")
         values["project"] = filters["project"]
 
-    if filters and filters.get("modules"):
-        module_value = filters.get("modules")
+    # Filter by Modules
+    module_value = filters.get("modules")
+    if module_value:
+        module_list = [m.strip() for m in module_value.split(",") if m.strip()]
+        if module_list:
+            conditions.append("custom_module IN %(modules)s")
+            values["modules"] = tuple(module_list)  
 
-        if module_value: 
-            module_list = [m.strip() for m in module_value.split(",") if m.strip()]  
-            
-            if module_list:  
-                conditions.append("custom_module IN %(modules)s")  
-                values["modules"] = tuple(module_list)  
-                
-
-
+    # Filter by Task
     if filters and filters.get("task"):
         conditions.append("name = %(task)s") 
         values["task"] = filters["task"]
 
+    # Filter by Assigned & Allotted
     if filters and filters.get("assigned"):
         conditions.append("custom_assigned_to = %(assigned)s")
         values["assigned"] = filters["assigned"]
@@ -113,12 +111,23 @@ def get_data(filters):
     if filters and filters.get("allotted"):
         conditions.append("custom_allotted_to = %(allotted)s")
         values["allotted"] = filters["allotted"]
-        
-    
-    if filters and filters.get("tags"):
-       conditions.append("custom_tag = %(tags)s")
-       values["tags"] = filters["tags"]
 
+    # Restrict "Project Users" to only their assigned/allotted tasks
+    if "Projects User" in frappe.get_roles(frappe.session.user):
+        conditions.append(
+            "(custom_assigned_to = %(current_user)s OR custom_allotted_to = %(current_user)s)"
+        )
+        values["current_user"] = frappe.session.user
+
+    # Filter by Tags (Allow Multiple Tags)
+    tags_value = filters.get("tags")
+    if tags_value:
+        tag_list = [tag.strip() for tag in tags_value.split(",") if tag.strip()]
+        if tag_list:
+            conditions.append("custom_tag IN %(tags)s")
+            values["tags"] = tuple(tag_list)
+
+    # Filter by Status, Priority, Start Date, End Date
     if filters and filters.get("status"):
         conditions.append("status = %(status)s")
         values["status"] = filters["status"]
@@ -135,8 +144,10 @@ def get_data(filters):
         conditions.append("act_end_date <= %(end_date)s")
         values["end_date"] = filters["end_date"]
 
+    # Build Condition String
     condition_str = " WHERE " + " AND ".join(conditions) if conditions else ""
-
+    
+    # SQL Query
     query = f"""
         SELECT 
             custom_module AS module,
@@ -152,6 +163,7 @@ def get_data(filters):
             `tabTask`
         {condition_str}
     """
-    print(query)
+
+    # Execute Query
     data = frappe.db.sql(query, values, as_dict=True)
     return data

@@ -100,15 +100,14 @@ frappe.query_reports["Task List"] = {
       frappe.user.has_role("Projects User") &&
       frappe.session.user !== "Administrator"
     ) {
-      report.set_filter_value("allotted", frappe.session.user); // Auto-set filter
       let allotted_filter = report.get_filter("allotted"); // Get the filter field
       if (allotted_filter) {
-        allotted_filter.df.read_only = true; // Make it read-only
+        allotted_filter.df.hidden = true; // Make it read-only
         allotted_filter.refresh(); // Refresh the UI to apply the change
       }
-      let project_filter = report.get_filter("allotted");
-      project_filter.df.hidden = true;
-      report.refresh(); // Refresh report
+      let assigned_filter = report.get_filter("assigned");
+      assigned_filter.df.hidden = true;
+      assigned_filter.refresh();
     }
 
     // Show "Add Task" button only for "Projects Manager" and "System Manager"
