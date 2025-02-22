@@ -96,9 +96,9 @@ def comment_notification(doc, method):
         followers = [follower.user for follower in  task.custom_followers]
     
         # Prepare the notification message
-        subject = f"New comment on Task: {task.name}"
+        subject = f"New comment on Task: {task.subject}"
         message = f"""
-        <p>A new comment has been added to Task <b>{task.name}</b> by {doc.owner}.</p>
+        <p>A new comment has been added to Task <b>{task.subject}</b> by {doc.owner}.</p>
         <p>Project: {task.project}</p>
         <p>Task: {task.subject}</p>
         <p>Comment:</p>
