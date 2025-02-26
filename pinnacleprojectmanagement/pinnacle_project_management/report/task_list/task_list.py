@@ -111,13 +111,15 @@ def get_data(filters):
     if filters and filters.get("allotted"):
         conditions.append("custom_allotted_to = %(allotted)s")
         values["allotted"] = filters["allotted"]
-
+    
+    current_user = frappe.session.user
+    roles = frappe.get_roles(current_user)
     # Restrict "Project Users" to only their assigned/allotted tasks
-    if "Projects User" in frappe.get_roles(frappe.session.user):
+    if "Projects User" in roles and not any(role in roles for role in ["Administrator", "System Manager"]):
         conditions.append(
             "(custom_assigned_to = %(current_user)s OR custom_allotted_to = %(current_user)s)"
         )
-        values["current_user"] = frappe.session.user
+        values["current_user"] = current_user
 
     # Filter by Tags (Allow Multiple Tags)
     tags_value = filters.get("tags")
