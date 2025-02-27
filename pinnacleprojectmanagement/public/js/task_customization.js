@@ -52,7 +52,7 @@ frappe.ui.form.on("Task", {
       if (frappe.session.user === "Administrator") return;
 
       // Editable fields
-      const editable_fields = ["custom_allotted_to", "status"];
+      const editable_fields = ["status"];
 
       Object.keys(frm.fields_dict).forEach((fieldname) => {
         let field = frm.fields_dict[fieldname];
