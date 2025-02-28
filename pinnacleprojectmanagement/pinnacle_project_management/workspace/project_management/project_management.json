@@ -13,7 +13,7 @@
  "is_hidden": 0,
  "label": "Project Management",
  "links": [],
- "modified": "2025-02-17 18:58:23.883150",
+ "modified": "2025-02-28 11:47:03.757758",
  "modified_by": "Administrator",
  "module": "Pinnacle Project Management",
  "name": "Project Management",
@@ -55,14 +55,6 @@
    "label": "Modules",
    "link_to": "Modules List",
    "stats_filter": "[]",
-   "type": "Report"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Backlog",
-   "link_to": "Task List",
-   "stats_filter": "[[\"Task\",\"status\",\"=\",\"Backlog\",false]]",
    "type": "Report"
   },
   {
