@@ -2,11 +2,16 @@ import frappe
 
 #It will allot project to users by creating user permissions for them
 def project_allottment(doc, method):
+    
     project_name = doc.name
 
     # Extract the current project managers from the multi-select list
     new_project_managers = {manager.get("user") for manager in doc.custom_project_managers if manager.get("user")}
-
+    
+    new_backlog_managers = {manager.get("user") for manager in doc.custom_backlog_managers if manager.get("user")}
+       
+    new_managers = new_project_managers | new_backlog_managers
+    
     # Fetch existing user permissions for this project
     existing_permissions = frappe.get_all(
         "User Permission",
@@ -17,8 +22,8 @@ def project_allottment(doc, method):
     existing_users = {perm["user"] for perm in existing_permissions}
 
     # Determine which users need to be removed and which need to be added
-    users_to_remove = existing_users - new_project_managers
-    users_to_add = new_project_managers - existing_users
+    users_to_remove = existing_users - new_managers
+    users_to_add = new_managers - existing_users
 
     # Remove old permissions
     for user in users_to_remove:

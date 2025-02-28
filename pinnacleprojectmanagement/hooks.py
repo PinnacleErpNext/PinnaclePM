@@ -156,9 +156,9 @@ doc_events = {
         "after_insert":"pinnacleprojectmanagement.pinnacle_project_management.custom_notifications.comment_notification"
     },
     "Task": {
-        "on_update": "pinnacleprojectmanagement.pinnacle_project_management.custom_notifications.task_followers",
-        "on_update": "pinnacleprojectmanagement.pinnacle_project_management.allottment.task_allottment",
-        "after_insert": "pinnacleprojectmanagement.pinnacle_project_management.allottment.task_allottment",
+        # "on_update": "pinnacleprojectmanagement.pinnacle_project_management.custom_notifications.task_followers",
+        # "on_update": "pinnacleprojectmanagement.pinnacle_project_management.allottment.task_allottment",
+        # "after_insert": "pinnacleprojectmanagement.pinnacle_project_management.allottment.task_allottment",
     },
     "Project": {
         "after_insert": "pinnacleprojectmanagement.pinnacle_project_management.allottment.project_allottment",

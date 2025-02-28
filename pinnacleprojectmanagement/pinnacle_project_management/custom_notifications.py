@@ -125,51 +125,50 @@ def comment_notification(doc, method):
                     message=message
                 )
 
-@frappe.whitelist(allow_guest=True)
-def backlog_notification(doc):
-    # Parse the incoming JSON document
-    doc = frappe.parse_json(doc)
+# @frappe.whitelist(allow_guest=True)
+# def backlog_notification(doc):
+#     # Parse the incoming JSON document
+#     doc = frappe.parse_json(doc)
 
-    project_manager_users = frappe.db.get_list(
-        'User Permission',
-        filters={
-            'for_value': doc.get("project"),  
-            'allow': 'Project'
-        },
-        fields=['user'],
-        ignore_permissions=True  
-    )
-    project_managers = [pm["user"] for pm in project_manager_users]
+#     project_manager_users = frappe.db.get_list(
+#         'User Permission',
+#         filters={
+#             'for_value': doc.get("project"),  
+#         },
+#         fields=['user'],
+#         ignore_permissions=True  
+#     )
+#     project_managers = [pm["user"] for pm in project_manager_users]
 
-    # Get custom followers using get() to avoid attribute errors
-    follower_users = doc.get("custom_followers", [])
+#     # Get custom followers using get() to avoid attribute errors
+#     follower_users = doc.get("custom_followers", [])
     
-    # Use the correct key ("owner") instead of "followers"
-    followers = [d.get("owner") for d in follower_users if d.get("owner")]
+#     # Use the correct key ("owner") instead of "followers"
+#     followers = [d.get("owner") for d in follower_users if d.get("owner")]
 
-    assigned_to = doc.get("custom_assigned_to")
+#     assigned_to = doc.get("custom_assigned_to")
 
-    # Combine all recipients
-    recipients = set(project_managers + followers)
-    recipients.add(doc.get("owner"))
-    if assigned_to:
-        recipients.add(assigned_to)
+#     # Combine all recipients
+#     recipients = set(project_managers + followers)
+#     recipients.add(doc.get("owner"))
+#     if assigned_to:
+#         recipients.add(assigned_to)
 
-    # Construct the email message
-    subject = f"Backlog for Project: {doc.get('project')}"
-    message = f"""
-    <p>There is a new backlog <b>{doc.get('subject')}</b> for project <b>{doc.get('project')}</b>.</p>
-    """
+#     # Construct the email message
+#     subject = f"Backlog for Project: {doc.get('project')}"
+#     message = f"""
+#     <p>There is a new backlog <b>{doc.get('subject')}</b> for project <b>{doc.get('project')}</b>.</p>
+#     """
 
-    # Send notifications to all recipients
-    for user in recipients:
-        user_email = frappe.get_value("User", user, "email")
-        if user_email:
-            frappe.sendmail(
-                recipients=[user_email],
-                subject=subject,
-                message=message
-            )
+#     # Send notifications to all recipients
+#     for user in recipients:
+#         user_email = frappe.get_value("User", user, "email")
+#         if user_email:
+#             frappe.sendmail(
+#                 recipients=[user_email],
+#                 subject=subject,
+#                 message=message
+#             )
 
-    frappe.msgprint("Backlog Notification Sent Successfully")
-    return {"status": "Success"}
+#     frappe.msgprint("Backlog Notification Sent Successfully")
+#     return {"status": "Success"}

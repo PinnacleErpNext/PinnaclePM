@@ -1,5 +1,12 @@
 frappe.ui.form.on("Task", {
   refresh(frm) {
+    frm.set_query("project", function () {
+      return {
+        filters: {
+          custom_backlog_managers: ["in", [frappe.session.user]],
+        },
+      };
+    });
     setBreadcrumbs(frm);
 
     // Set status options
@@ -16,8 +23,9 @@ frappe.ui.form.on("Task", {
 
     if (frappe.user.has_role("Backlog Manager")) {
       if (frappe.session.user === "Administrator") return;
-
-      frm.set_value("status", "Backlog");
+      if (frm.is_new()) {
+        frm.set_value("status", "Backlog");
+      }
 
       // Make fields read-only
       frm.set_df_property("status", "read_only", true);
@@ -74,19 +82,5 @@ frappe.ui.form.on("Task", {
 
   exp_end_date(frm) {
     frm.set_value("status", "Working");
-  },
-  before_save: function (frm) {
-    frappe.call({
-      method:
-        "pinnacleprojectmanagement.pinnacle_project_management.custom_notifications.backlog_notification",
-      args: {
-        doc: frm.doc,
-      },
-      callback: function (response) {
-        if (response.message && response.message.status === "Success") {
-          frappe.msgprint("Notification sent.");
-        }
-      },
-    });
   },
 });
