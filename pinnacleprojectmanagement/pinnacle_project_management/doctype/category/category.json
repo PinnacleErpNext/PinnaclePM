@@ -7,6 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "category",
+  "project",
+  "module",
   "description"
  ],
  "fields": [
@@ -22,11 +24,24 @@
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "module",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Module",
+   "options": "Modules"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-27 12:02:25.733837",
+ "modified": "2025-02-28 16:58:13.126628",
  "modified_by": "Administrator",
  "module": "Pinnacle Project Management",
  "name": "Category",

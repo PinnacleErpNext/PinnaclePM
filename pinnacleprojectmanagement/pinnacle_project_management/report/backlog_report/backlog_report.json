@@ -1,0 +1,37 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2025-02-28 15:09:30.407814",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2025-02-28 15:09:30.407814",
+ "modified_by": "Administrator",
+ "module": "Pinnacle Project Management",
+ "name": "Backlog Report",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Task",
+ "reference_report": "Task List",
+ "report_name": "Backlog Report",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Projects User"
+  },
+  {
+   "role": "Projects Manager"
+  },
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Backlog Manager"
+  }
+ ],
+ "timeout": 0
+}

@@ -1,12 +1,5 @@
 frappe.ui.form.on("Task", {
   refresh(frm) {
-    frm.set_query("project", function () {
-      return {
-        filters: {
-          custom_backlog_managers: ["in", [frappe.session.user]],
-        },
-      };
-    });
     setBreadcrumbs(frm);
 
     // Set status options

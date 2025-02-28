@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"ke55atSK11\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Project Management</span>\",\"col\":12}},{\"id\":\"qm2_YQRnkt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Projects\",\"col\":4}},{\"id\":\"WGH2zZFmms\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tasks\",\"col\":4}},{\"id\":\"mnWhQOBh5E\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Modules\",\"col\":4}},{\"id\":\"V17H4GKtC6\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Backlog\",\"col\":3}}]",
+ "content": "[{\"id\":\"ke55atSK11\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Project Management</span>\",\"col\":12}},{\"id\":\"qm2_YQRnkt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Projects\",\"col\":4}},{\"id\":\"WGH2zZFmms\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tasks\",\"col\":4}},{\"id\":\"mnWhQOBh5E\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Modules\",\"col\":4}}]",
  "creation": "2025-02-14 11:42:03.572882",
  "custom_blocks": [],
  "docstatus": 0,
@@ -13,7 +13,7 @@
  "is_hidden": 0,
  "label": "Project Management",
  "links": [],
- "modified": "2025-02-28 11:47:03.757758",
+ "modified": "2025-02-28 16:19:06.975129",
  "modified_by": "Administrator",
  "module": "Pinnacle Project Management",
  "name": "Project Management",
