@@ -151,20 +151,23 @@ def get_data(filters):
     
     # SQL Query
     query = f"""
-        SELECT 
-            custom_module AS module,
-            CONCAT('<a href="/app/task/', name, '">', subject, '</a>') AS task,
-            custom_assigned_to AS assigned,
-            custom_allotted_to AS allotted,
-            custom_tag AS tags,
-            priority,
-            status,
-            act_start_date AS start_date,
-            act_end_date AS end_date
-        FROM
-            `tabTask`
-        {condition_str}
-    """
+                SELECT 
+                    t.custom_module AS module,
+                    CONCAT('<a href="/app/task/', t.name, '">', t.subject, '</a>') AS task,
+                    COALESCE(ua.full_name, t.custom_assigned_to) AS assigned,
+                    COALESCE(ua2.full_name, t.custom_allotted_to) AS allotted,
+                    t.custom_tag AS tags,
+                    t.priority,
+                    t.status,
+                    t.act_start_date AS start_date,
+                    t.act_end_date AS end_date
+                FROM
+                    `tabTask` t
+                LEFT JOIN `tabUser` ua ON t.custom_assigned_to = ua.email
+                LEFT JOIN `tabUser` ua2 ON t.custom_allotted_to = ua2.email
+                {condition_str}
+            """
+
 
     # Execute Query
     data = frappe.db.sql(query, values, as_dict=True)
