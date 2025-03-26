@@ -43,7 +43,8 @@ def get_columns():
         {"label": _("Tags"), "fieldname": "tags", "fieldtype": "Data", "width": 100},
         {
             "label": _("Priority"),
-            "fieldname": "Select",
+            "fieldname": "priority",
+            "fieldtype": "Select",
             "options": ["", "Low", "Medium", "High"],
             "width": 100,
         },

@@ -79,6 +79,7 @@ frappe.query_reports["Task List"] = {
     },
   ],
   onload: function (report) {
+    console.log(report)
     let module_filter = report.get_filter("modules");
     let options = [];
     if (module_filter) {
