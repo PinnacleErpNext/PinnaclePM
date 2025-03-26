@@ -4,10 +4,12 @@
 import frappe
 from frappe import _
 
+
 def execute(filters=None):
     columns = get_columns()
     data = get_data(filters)
     return columns, data
+
 
 def get_columns():
     return [
@@ -16,39 +18,34 @@ def get_columns():
             "fieldname": "module",
             "fieldtype": "Data",
             "options": "Modules",
-            "width":110
+            "width": 110,
         },
         {
             "label": _("Task"),
             "fieldname": "task",
             "fieldtype": "HTML",  # Hyperlinked task names
-            "width":200
+            "width": 200,
         },
         {
             "label": _("Assigned"),
             "fieldname": "assigned",
             "fieldtype": "Link",
             "options": "User",
-            "width":200
+            "width": 200,
         },
         {
             "label": _("Allotted"),
             "fieldname": "allotted",
             "fieldtype": "Link",
             "options": "User",
-            "width":200
+            "width": 200,
         },
-        {
-            "label": _("Tags"),
-            "fieldname": "tags",
-            "fieldtype": "Data",
-            "width":100
-        },
+        {"label": _("Tags"), "fieldname": "tags", "fieldtype": "Data", "width": 100},
         {
             "label": _("Priority"),
             "fieldname": "Select",
             "options": ["", "Low", "Medium", "High"],
-            "width":100
+            "width": 100,
         },
         {
             "label": _("Status"),
@@ -65,21 +62,22 @@ def get_columns():
                 "Cancelled",
                 "Can't Reproduce",
             ],
-            "width":100
+            "width": 100,
         },
         {
             "label": _("Start Date"),
             "fieldname": "start_date",
             "fieldtype": "Date",
-            "width":100
+            "width": 100,
         },
         {
             "label": _("End Date"),
             "fieldname": "end_date",
             "fieldtype": "Date",
-            "width":100
+            "width": 100,
         },
     ]
+
 
 def get_data(filters):
     conditions = []
@@ -96,11 +94,11 @@ def get_data(filters):
         module_list = [m.strip() for m in module_value.split(",") if m.strip()]
         if module_list:
             conditions.append("custom_module IN %(modules)s")
-            values["modules"] = tuple(module_list)  
+            values["modules"] = tuple(module_list)
 
     # Filter by Task
     if filters and filters.get("task"):
-        conditions.append("name = %(task)s") 
+        conditions.append("name = %(task)s")
         values["task"] = filters["task"]
 
     # Filter by Assigned & Allotted
@@ -111,14 +109,40 @@ def get_data(filters):
     if filters and filters.get("allotted"):
         conditions.append("custom_allotted_to = %(allotted)s")
         values["allotted"] = filters["allotted"]
-    
+
     current_user = frappe.session.user
     roles = frappe.get_roles(current_user)
     # Restrict "Project Users" to only their assigned/allotted tasks
-    if "Projects User" in roles and not any(role in roles for role in ["Administrator", "System Manager"]):
+    if "Projects User" in roles and not any(
+        role in roles for role in ["Administrator", "System Manager"]
+    ):
         conditions.append(
             "(custom_assigned_to = %(current_user)s OR custom_allotted_to = %(current_user)s)"
         )
+        values["current_user"] = current_user
+
+    # Restrict "Project Managers" to only their project's tasks
+    if "Projects Manager" in roles and not any(
+        role in roles for role in ["Administrator", "System Manager"]
+    ):
+
+        projectListData = frappe.db.get_list(
+            "User Permission",
+            filters={"user": current_user},
+            fields=["for_value"],
+            as_list=True,
+        )
+
+        projectList = [data[0] for data in projectListData]
+
+        if projectList:
+
+            conditions.append("t.project in %(projectList)s")
+            values["projectList"] = projectList
+        else:
+
+            conditions.append("1=0")
+
         values["current_user"] = current_user
 
     # Filter by Tags (Allow Multiple Tags)
@@ -148,7 +172,7 @@ def get_data(filters):
 
     # Build Condition String
     condition_str = " WHERE " + " AND ".join(conditions) if conditions else ""
-    
+
     # SQL Query
     query = f"""
                 SELECT 
@@ -167,7 +191,6 @@ def get_data(filters):
                 LEFT JOIN `tabUser` ua2 ON t.custom_allotted_to = ua2.email
                 {condition_str}
             """
-
 
     # Execute Query
     data = frappe.db.sql(query, values, as_dict=True)

@@ -44,16 +44,6 @@ frappe.ui.form.on("Task", {
     frm.set_query("custom_module", function () {
       return { filters: { project: frm.doc.project } };
     });
-    frm.set_query("custom_category", function () {
-      return { filters: { project: frm.doc.project } };
-    });
-  },
-  custom_module: function (frm) {
-    frm.set_query("custom_category", function () {
-      return {
-        filters: { project: frm.doc.project, module: frm.doc.custom_module },
-      };
-    });
   },
 
   onload(frm) {
@@ -63,7 +53,7 @@ frappe.ui.form.on("Task", {
       if (frappe.session.user === "Administrator") return;
 
       // Editable fields
-      const editable_fields = ["status","completed_on","completed_by"];
+      const editable_fields = ["status", "completed_on", "completed_by"];
 
       Object.keys(frm.fields_dict).forEach((fieldname) => {
         let field = frm.fields_dict[fieldname];
