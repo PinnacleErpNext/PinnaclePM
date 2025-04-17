@@ -191,6 +191,7 @@ def get_data(filters):
                 LEFT JOIN `tabUser` ua ON t.custom_assigned_to = ua.email
                 LEFT JOIN `tabUser` ua2 ON t.custom_allotted_to = ua2.email
                 {condition_str}
+                ORDER BY t.creation DESC
             """
 
     # Execute Query
