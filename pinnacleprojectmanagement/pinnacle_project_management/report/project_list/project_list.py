@@ -84,8 +84,22 @@ def get_data(filters):
         GROUP BY
             p.name
     """
-
-    if len(user_projects) > 0:
-        return frappe.db.sql(query, values, as_dict=True)
-    else:
+    current_user = frappe.session.user
+    roles = frappe.get_roles(current_user)
+    if "Projects User" in roles and not any(
+        role in roles for role in ["Administrator", "System Manager"]
+    ):
         msgprint(_("You do not have access to this."))
+    elif "Projects Manager" in roles and not any(
+        role in roles for role in ["Administrator", "System Manager"]
+    ):
+        if len(user_projects) > 0:
+            return frappe.db.sql(query, values, as_dict=True)
+        else:
+            msgprint(
+                _(
+                    "You have not been assigned any projects. Please contact the administrator."
+                )
+            )
+    else:
+        return frappe.db.sql(query, values, as_dict=True)
