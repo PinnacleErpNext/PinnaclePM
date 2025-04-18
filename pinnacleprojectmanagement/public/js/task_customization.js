@@ -53,7 +53,13 @@ frappe.ui.form.on("Task", {
       if (frappe.session.user === "Administrator") return;
 
       // Editable fields
-      const editable_fields = ["status", "completed_on", "completed_by"];
+      const editable_fields = [
+        "status",
+        "completed_on",
+        "completed_by",
+        "exp_start_date",
+        "exp_end_date",
+      ];
 
       Object.keys(frm.fields_dict).forEach((fieldname) => {
         let field = frm.fields_dict[fieldname];
