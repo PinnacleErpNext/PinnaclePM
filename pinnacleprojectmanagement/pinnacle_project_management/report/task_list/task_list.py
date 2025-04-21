@@ -184,8 +184,8 @@ def get_data(filters):
                     t.custom_tag AS tags,
                     t.priority,
                     t.status,
-                    t.act_start_date AS start_date,
-                    t.act_end_date AS end_date
+                    t.exp_start_date AS start_date,
+                    t.exp_start_date AS end_date
                 FROM
                     `tabTask` t
                 LEFT JOIN `tabUser` ua ON t.custom_assigned_to = ua.email
