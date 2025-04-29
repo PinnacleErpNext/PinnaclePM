@@ -51,7 +51,7 @@ def get_data(filters):
         filters={"allow": "Project", "user": frappe.session.user},
         pluck="for_value",
     )
-    print(len(user_projects))
+
     # Ensure there are valid projects for the user
     if user_projects:
         conditions.append("p.name IN %(user_projects)s")

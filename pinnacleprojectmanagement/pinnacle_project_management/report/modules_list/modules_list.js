@@ -43,7 +43,11 @@ frappe.query_reports["Modules List"] = {
   },
 
   onload: function (report) {
-    setBreadcrumbs();
+    frappe.breadcrumbs.clear();
+      frappe.breadcrumbs.set_custom_breadcrumbs({
+        label: "Modules",
+        route: "/app/query-report/Modules List",
+      });
     if (frappe.user.has_role(["Projects Manager", "System Manager"])) {
       report.page.add_inner_button(__("Add Module"), function () {
         frappe.new_doc("Modules"); // Open the Task form

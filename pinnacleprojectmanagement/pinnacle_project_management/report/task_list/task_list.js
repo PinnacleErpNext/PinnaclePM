@@ -1,4 +1,5 @@
-frappe.provide("pinnacleprojectmanagement.public.js.task_customization");
+// frappe.provide("pinnacleprojectmanagement.public.js.task_customization");
+
 frappe.query_reports["Task List"] = {
   filters: [
     {
@@ -79,7 +80,7 @@ frappe.query_reports["Task List"] = {
     },
   ],
   onload: function (report) {
-    console.log(report)
+    applyBreadcrumbs();
     let module_filter = report.get_filter("modules");
     let options = [];
     if (module_filter) {
@@ -95,8 +96,6 @@ frappe.query_reports["Task List"] = {
           module_filter.refresh();
         });
     }
-
-    setBreadcrumbs();
     if (
       frappe.user.has_role("Projects User") &&
       frappe.session.user !== "Administrator"
@@ -126,66 +125,51 @@ frappe.query_reports["Task List"] = {
   },
 };
 
-// function setBreadcrumbs() {
-//   const history = frappe.route_history || [];
-//   let formattedHistory = [];
-
-//   history.forEach((entry) => {
-//     if (Array.isArray(entry)) {
-//       if (entry[0] !== "Workspaces") {
-//         formattedHistory.push(entry[1]);
-//       } else if (entry.length > 1) {
-//         formattedHistory = [entry[1]];
-//       }
-//     }
-//   });
-
-//   formattedHistory = formattedHistory.join(" > ");
-//   console.log(formattedHistory);
-
-//   frappe.breadcrumbs.clear();
-//   switch (formattedHistory) {
-//     case "Project Management > Task List":
-//       frappe.breadcrumbs.set_custom_breadcrumbs({
-//         label: "Task List",
-//         route: "/app/query-report/Task List",
-//       });
-//       break;
-//     case "Project Management > Modules List > Task List":
-//       frappe.breadcrumbs.set_custom_breadcrumbs({
-//         label: "Modules",
-//         route: "/app/query-report/Modules List",
-//       });
-//       frappe.breadcrumbs.set_custom_breadcrumbs({
-//         label: "Task List",
-//         route: "/app/query-report/Task List",
-//       });
-//       break;
-//     case "Project Management > Project List > Task List":
-//       frappe.breadcrumbs.set_custom_breadcrumbs({
-//         label: "Project List",
-//         route: "/app/query-report/Project List",
-//       });
-//       frappe.breadcrumbs.set_custom_breadcrumbs({
-//         label: "Task List",
-//         route: "/app/query-report/Task List",
-//       });
-//       break;
-//     case "Project List > Task List":
-//       frappe.breadcrumbs.set_custom_breadcrumbs({
-//         label: "Project List",
-//         route: "/app/query-report/Project List",
-//       });
-//       frappe.breadcrumbs.set_custom_breadcrumbs({
-//         label: "Task List",
-//         route: "/app/query-report/Task List",
-//       });
-//       break;
-//     default:
-//       frappe.breadcrumbs.set_custom_breadcrumbs({
-//         label: "Project Management",
-//         route: "/app/project-management",
-//       });
-//       break;
-//   }
-// }
+function applyBreadcrumbs() {
+  defaultLabel = "Task";
+  defaultRoute = "/app/query-report/Task List";
+  if (frappe.route_history.length >= 2) {
+    if (
+      frappe.route_history[frappe.route_history.length - 2][1] ===
+      "Project List"
+    ) {
+      frappe.breadcrumbs.clear();
+      frappe.breadcrumbs.set_custom_breadcrumbs({
+        label: "Project",
+        route: "/app/query-report/Project List",
+      });
+      frappe.breadcrumbs.set_custom_breadcrumbs({
+        label: "Tasks",
+        route: "/app/query-report/Task List",
+      });
+    } else if (
+      frappe.route_history[frappe.route_history.length - 2][1] ===
+      "Modules List"
+    ) {
+      frappe.breadcrumbs.clear();
+      frappe.breadcrumbs.set_custom_breadcrumbs({
+        label: "Modules",
+        route: "/app/query-report/Modules List",
+      });
+      frappe.breadcrumbs.set_custom_breadcrumbs({
+        label: "Tasks",
+        route: "/app/query-report/Task List",
+      });
+    } else if (
+      frappe.route_history[frappe.route_history.length - 2][1] ===
+      "PM-Dashboard"
+    ) {
+      frappe.breadcrumbs.clear();
+      frappe.breadcrumbs.set_custom_breadcrumbs({
+        label: "Tasks",
+        route: "/app/query-report/Task List",
+      });
+    }
+  } else {
+    frappe.breadcrumbs.clear();
+    frappe.breadcrumbs.set_custom_breadcrumbs({
+      label: "Tasks",
+      route: "/app/query-report/Task List",
+    });
+  }
+}

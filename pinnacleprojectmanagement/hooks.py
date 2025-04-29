@@ -32,7 +32,7 @@ before_migrate = "pinnacleprojectmanagement.utils.after_migrate"
 # app_include_css = "/assets/pinnacleprojectmanagement/css/pinnacleprojectmanagement.css"
 app_include_js = [
     # "/assets/pinnacleprojectmanagement/js/pinnacleprojectmanagement.js,"
-    "/assets/pinnacleprojectmanagement/js/breadcrumbs_manager.js"
+    # "/assets/pinnacleprojectmanagement/js/breadcrumbs_manager.js"
     ]
 
 # include js, css files in header of web template

@@ -1,22 +1,22 @@
 {
  "charts": [],
- "content": "[{\"id\":\"ke55atSK11\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Project Management</span>\",\"col\":12}},{\"id\":\"qm2_YQRnkt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Projects\",\"col\":4}},{\"id\":\"WGH2zZFmms\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tasks\",\"col\":4}},{\"id\":\"mnWhQOBh5E\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Modules\",\"col\":4}},{\"id\":\"gD3k4eYnRt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Backlog\",\"col\":3}}]",
+ "content": "[{\"id\":\"BB0-QwgoMz\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Dashboard</b></span>\",\"col\":12}},{\"id\":\"qm2_YQRnkt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Projects\",\"col\":4}},{\"id\":\"WGH2zZFmms\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tasks\",\"col\":4}},{\"id\":\"mnWhQOBh5E\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Modules\",\"col\":4}},{\"id\":\"gD3k4eYnRt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Backlog\",\"col\":3}}]",
  "creation": "2025-02-14 11:42:03.572882",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "projects",
- "idx": 1,
- "indicator_color": "green",
+ "icon": "dashboard-list",
+ "idx": 2,
+ "indicator_color": "",
  "is_hidden": 0,
- "label": "Project Management",
+ "label": "PM-Dashboard",
  "links": [],
- "modified": "2025-03-25 15:50:04.323526",
+ "modified": "2025-04-26 15:17:30.679247",
  "modified_by": "Administrator",
  "module": "Pinnacle Project Management",
- "name": "Project Management",
+ "name": "PM-Dashboard",
  "number_cards": [],
  "owner": "Administrator",
  "parent_page": "Projects",
@@ -72,5 +72,5 @@
    "type": "Report"
   }
  ],
- "title": "Project Management"
+ "title": "PM-Dashboard"
 }

@@ -1,7 +1,5 @@
 frappe.ui.form.on("Task", {
   refresh(frm) {
-    setBreadcrumbs(frm);
-
     // Set status options
     frm.set_df_property("status", "options", [
       "Backlog",
@@ -47,8 +45,8 @@ frappe.ui.form.on("Task", {
   },
 
   onload(frm) {
-    setBreadcrumbs(frm);
-
+    // setBreadcrumbs(frm);
+    applyBreadcrumbs(frm);
     if (frappe.user.has_role("Projects User")) {
       if (frappe.session.user === "Administrator") return;
 
@@ -83,3 +81,79 @@ frappe.ui.form.on("Task", {
     frm.set_value("status", "Working");
   },
 });
+
+function applyBreadcrumbs(frm) {
+  if (frappe.route_history.length >= 3) {
+    if (
+      frappe.route_history[frappe.route_history.length - 3][1] ===
+      "Project List"
+    ) {
+      frappe.breadcrumbs.clear();
+      frappe.breadcrumbs.set_custom_breadcrumbs({
+        label: "Project",
+        route: "/app/query-report/Project List",
+      });
+      frappe.breadcrumbs.set_custom_breadcrumbs({
+        label: "Tasks",
+        route: "/app/query-report/Task List",
+      });
+      frappe.breadcrumbs.set_custom_breadcrumbs({
+        label: frm.doc.name,
+        route: `/app/task/${frm.doc.name}`,
+      });
+      return;
+    } else if (
+      frappe.route_history[frappe.route_history.length - 3][1] ===
+      "Modules List"
+    ) {
+      frappe.breadcrumbs.clear();
+      frappe.breadcrumbs.set_custom_breadcrumbs({
+        label: "Modules",
+        route: "/app/query-report/Modules List",
+      });
+      frappe.breadcrumbs.set_custom_breadcrumbs({
+        label: "Tasks",
+        route: "/app/query-report/Task List",
+      });
+      frappe.breadcrumbs.set_custom_breadcrumbs({
+        label: frm.doc.name,
+        route: `/app/task/${frm.doc.name}`,
+      });
+      return;
+    } else if (
+      frappe.route_history[frappe.route_history.length - 3][1] ===
+      "PM-Dashboard"
+    ) {
+      frappe.breadcrumbs.clear();
+      frappe.breadcrumbs.set_custom_breadcrumbs({
+        label: "Tasks",
+        route: "/app/query-report/Task List",
+      });
+      frappe.breadcrumbs.set_custom_breadcrumbs({
+        label: frm.doc.name,
+        route: `/app/task/${frm.doc.name}`,
+      });
+      return;
+    }
+  } else {
+    frappe.breadcrumbs.clear();
+    frappe.breadcrumbs.set_custom_breadcrumbs({
+      label: "Tasks",
+      route: "/app/query-report/Task List",
+    });
+    frappe.breadcrumbs.set_custom_breadcrumbs({
+      label: frm.doc.name,
+      route: `/app/task/${frm.doc.name}`,
+    });
+    return;
+  }
+  frappe.breadcrumbs.clear();
+  frappe.breadcrumbs.set_custom_breadcrumbs({
+    label: "Tasks",
+    route: "/app/query-report/Task List",
+  });
+  frappe.breadcrumbs.set_custom_breadcrumbs({
+    label: frm.doc.name,
+    route: `/app/task/${frm.doc.name}`,
+  });
+}

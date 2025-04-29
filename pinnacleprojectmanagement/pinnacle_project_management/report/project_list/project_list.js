@@ -43,7 +43,11 @@ frappe.query_reports["Project List"] = {
     return value;
   },
   onload: function (report) {
-    setBreadcrumbs();
+    // setBreadcrumbs();
+    frappe.breadcrumbs.set_custom_breadcrumbs({
+      label: "Projects",
+      route: "/app/query-report/Project List",
+    });
     if (frappe.user.has_role(["System Manager"])) {
       report.page.add_inner_button(__("Add Project"), function () {
         frappe.new_doc("Task"); // Open the Task form
