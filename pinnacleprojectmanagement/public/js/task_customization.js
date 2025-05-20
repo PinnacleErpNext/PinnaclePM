@@ -12,7 +12,10 @@ frappe.ui.form.on("Task", {
       "Can't Reproduce",
     ]);
 
-    if (frappe.user.has_role("Backlog Manager")) {
+    if (
+      frappe.user.has_role("Backlog Manager") &&
+      frm.doc.custom_allotted_to !== frappe.session.user
+    ) {
       if (frappe.session.user === "Administrator") return;
       if (frm.is_new()) {
         frm.set_value("status", "Backlog");
@@ -24,6 +27,25 @@ frappe.ui.form.on("Task", {
     } else {
       frm.set_df_property("project", "reqd", true);
     }
+  },
+
+  custom__firebird_db_backup: function (frm) {
+    updateCheckListCount(frm);
+  },
+  custom__iis_feature_installation: function (frm) {
+    updateCheckListCount(frm);
+  },
+  custom__mygstcafe_setup_installation: function (frm) {
+    updateCheckListCount(frm);
+  },
+  custom_pg_admin_setup_installation: function (frm) {
+    updateCheckListCount(frm);
+  },
+  custom__software_update: function (frm) {
+    updateCheckListCount(frm);
+  },
+  custom__data_base_restore: function (frm) {
+    updateCheckListCount(frm);
   },
 
   project(frm) {
@@ -57,6 +79,8 @@ frappe.ui.form.on("Task", {
         "completed_by",
         "exp_start_date",
         "exp_end_date",
+        "progress",
+        "expected_time",
       ];
 
       Object.keys(frm.fields_dict).forEach((fieldname) => {
@@ -156,4 +180,25 @@ function applyBreadcrumbs(frm) {
     label: frm.doc.name,
     route: `/app/task/${frm.doc.name}`,
   });
+}
+
+function updateCheckListCount(frm) {
+  let total = 0;
+  const fields = [
+    "custom__firebird_db_backup",
+    "custom__iis_feature_installation",
+    "custom__mygstcafe_setup_installation",
+    "custom_pg_admin_setup_installation",
+    "custom__pg_setup_app_installation",
+    "custom__software_update",
+    "custom__data_base_restore",
+  ];
+
+  fields.forEach((field) => {
+    if (frm.doc[field]) {
+      total++;
+    }
+  });
+
+  frm.set_value("custom_check_list_count", total);
 }

@@ -31,9 +31,9 @@ before_migrate = "pinnacleprojectmanagement.utils.after_migrate"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/pinnacleprojectmanagement/css/pinnacleprojectmanagement.css"
 app_include_js = [
-    # "/assets/pinnacleprojectmanagement/js/pinnacleprojectmanagement.js,"
+    "/assets/pinnacleprojectmanagement/js/hide_list_view.js"
     # "/assets/pinnacleprojectmanagement/js/breadcrumbs_manager.js"
-    ]
+]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/pinnacleprojectmanagement/css/pinnacleprojectmanagement.css"
@@ -50,10 +50,10 @@ app_include_js = [
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {
-    "Task" : "public/js/task_customization.js"
-    }
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_js = {"Task": "public/js/task_customization.js"}
+doctype_list_js = {
+    "Task": "public/js/task_customization.js",
+}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -147,13 +147,13 @@ doctype_js = {
 # Hook on document methods and events
 
 doc_events = {
-	# "*": {
-	# 	"on_update": "method",
-	# 	"on_cancel": "method",
-	# 	"on_trash": "method"
-	# }
-    "Comment":{
-        "after_insert":"pinnacleprojectmanagement.pinnacle_project_management.custom_notifications.comment_notification"
+    # "*": {
+    # 	"on_update": "method",
+    # 	"on_cancel": "method",
+    # 	"on_trash": "method"
+    # }
+    "Comment": {
+        "after_insert": "pinnacleprojectmanagement.pinnacle_project_management.custom_notifications.comment_notification"
     },
     "Task": {
         # "on_update": "pinnacleprojectmanagement.pinnacle_project_management.custom_notifications.task_followers",
@@ -162,8 +162,8 @@ doc_events = {
     },
     "Project": {
         "after_insert": "pinnacleprojectmanagement.pinnacle_project_management.allottment.project_allottment",
-        "on_update": "pinnacleprojectmanagement.pinnacle_project_management.allottment.project_allottment"
-    }
+        "on_update": "pinnacleprojectmanagement.pinnacle_project_management.allottment.project_allottment",
+    },
 }
 
 # Scheduled Tasks
@@ -262,4 +262,3 @@ doc_events = {
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
-
