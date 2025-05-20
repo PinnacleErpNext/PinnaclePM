@@ -1,7 +1,10 @@
 frappe.ui.form.on("Task", {
   validate: function (frm) {
     if (frm.doc.status === "Completed") {
-      if ((frm.doc.custom_check_list_count !== 7) && (frm.doc.project === "Postgres Migration")) {
+      if (
+        frm.doc.custom_check_list_count !== 7 &&
+        frm.doc.project === "Postgres Migration"
+      ) {
         frappe.throw("Please complete all the steps!");
       }
     }
@@ -89,6 +92,41 @@ frappe.ui.form.on("Task", {
         "exp_end_date",
         "progress",
         "expected_time",
+      ];
+
+      Object.keys(frm.fields_dict).forEach((fieldname) => {
+        let field = frm.fields_dict[fieldname];
+        if (
+          field.df.fieldtype !== "Section Break" &&
+          !editable_fields.includes(fieldname)
+        ) {
+          frm.set_df_property(fieldname, "read_only", 1);
+        }
+      });
+
+      frm.refresh();
+    } else if (
+      frappe.user.has_role("Backlog Manager") &&
+      frm.doc.custom_allotted_to === frappe.session.user
+    ) {
+      if (frappe.session.user === "Administrator") return;
+
+      // Editable fields
+      const editable_fields = [
+        "status",
+        "completed_on",
+        "completed_by",
+        "exp_start_date",
+        "exp_end_date",
+        "progress",
+        "expected_time",
+        "custom__firebird_db_backup",
+        "custom__iis_feature_installation",
+        "custom__mygstcafe_setup_installation",
+        "custom_pg_admin_setup_installation",
+        "custom__pg_setup_app_installation",
+        "custom__software_update",
+        "custom__data_base_restore",
       ];
 
       Object.keys(frm.fields_dict).forEach((fieldname) => {
