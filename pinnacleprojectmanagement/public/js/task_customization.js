@@ -1,4 +1,12 @@
 frappe.ui.form.on("Task", {
+  validate: function (frm) {
+    if (frm.doc.status === "Completed") {
+      if ((frm.doc.custom_check_list_count !== 7) && (frm.doc.project === "Postgres Migration")) {
+        frappe.throw("Please complete all the steps!");
+      }
+    }
+  },
+
   refresh(frm) {
     // Set status options
     frm.set_df_property("status", "options", [
