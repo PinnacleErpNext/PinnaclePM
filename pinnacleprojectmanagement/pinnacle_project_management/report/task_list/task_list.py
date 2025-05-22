@@ -14,6 +14,12 @@ def execute(filters=None):
 def get_columns():
     return [
         {
+            "label": _("Created At"),
+            "fieldname": "creation",
+            "fieldtype": "Date",
+            "width": 110,
+        },
+        {
             "label": _("Module"),
             "fieldname": "module",
             "fieldtype": "Data",
@@ -171,12 +177,17 @@ def get_data(filters):
         conditions.append("act_end_date <= %(end_date)s")
         values["end_date"] = filters["end_date"]
 
+    if filters and filters.get("creation"):
+        conditions.append("Date(t.creation) = %(creation)s")
+        values["creation"] = filters["creation"]
+
     # Build Condition String
     condition_str = " WHERE " + " AND ".join(conditions) if conditions else ""
 
     # SQL Query
     query = f"""
                 SELECT 
+                    t.creation,
                     t.custom_module AS module,
                     CONCAT('<a href="/app/task/', t.name, '">', t.subject, '</a>') AS task,
                     COALESCE(ua.full_name, t.custom_assigned_to) AS assigned,

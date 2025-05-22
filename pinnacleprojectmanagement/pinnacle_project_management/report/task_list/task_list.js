@@ -3,6 +3,11 @@
 frappe.query_reports["Task List"] = {
   filters: [
     {
+      fieldname: "creation",
+      label: __("Created At"),
+      fieldtype: "Date",
+    },
+    {
       fieldname: "project",
       label: __("Project"),
       fieldtype: "Link",
