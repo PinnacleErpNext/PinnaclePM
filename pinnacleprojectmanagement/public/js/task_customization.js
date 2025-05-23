@@ -60,6 +60,7 @@ frappe.ui.form.on("Task", {
   },
 
   project(frm) {
+    frm.set_df_property("status", "options", ["Open", "Working", "Completed"]);
     frappe.db
       .get_list("Modules", {
         fields: ["module_name"],
