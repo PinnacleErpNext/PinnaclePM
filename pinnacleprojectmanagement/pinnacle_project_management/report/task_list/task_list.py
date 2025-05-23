@@ -170,11 +170,11 @@ def get_data(filters):
         values["priority"] = filters["priority"]
 
     if filters and filters.get("start_date"):
-        conditions.append("act_start_date >= %(start_date)s")
+        conditions.append("exp_start_date = %(start_date)s")
         values["start_date"] = filters["start_date"]
 
     if filters and filters.get("end_date"):
-        conditions.append("act_end_date <= %(end_date)s")
+        conditions.append("exp_end_date = %(end_date)s")
         values["end_date"] = filters["end_date"]
 
     if filters and filters.get("creation"):
