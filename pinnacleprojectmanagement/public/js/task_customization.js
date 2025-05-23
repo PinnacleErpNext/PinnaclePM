@@ -12,6 +12,13 @@ frappe.ui.form.on("Task", {
 
   refresh(frm) {
     // Set status options
+    if (frm.doc.project === "Postgres Migration") {
+      frm.set_df_property("status", "options", [
+        "Open",
+        "Working",
+        "Completed",
+      ]);
+    }
     frm.set_df_property("status", "options", [
       "Backlog",
       "Open",
@@ -60,7 +67,13 @@ frappe.ui.form.on("Task", {
   },
 
   project(frm) {
-    frm.set_df_property("status", "options", ["Open", "Working", "Completed"]);
+    if (frm.doc.project === "Postgres Migration") {
+      frm.set_df_property("status", "options", [
+        "Open",
+        "Working",
+        "Completed",
+      ]);
+    }
     frappe.db
       .get_list("Modules", {
         fields: ["module_name"],
@@ -80,6 +93,13 @@ frappe.ui.form.on("Task", {
 
   onload(frm) {
     // setBreadcrumbs(frm);
+    if (frm.doc.project === "Postgres Migration") {
+      frm.set_df_property("status", "options", [
+        "Open",
+        "Working",
+        "Completed",
+      ]);
+    }
     applyBreadcrumbs(frm);
     if (frappe.user.has_role("Projects User")) {
       if (frappe.session.user === "Administrator") return;
