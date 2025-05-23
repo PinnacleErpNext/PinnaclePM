@@ -120,6 +120,7 @@ frappe.ui.form.on("Task", {
         "exp_end_date",
         "progress",
         "expected_time",
+        "description",
         "custom__firebird_db_backup",
         "custom__iis_feature_installation",
         "custom__mygstcafe_setup_installation",
