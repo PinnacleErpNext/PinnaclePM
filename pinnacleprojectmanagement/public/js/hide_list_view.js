@@ -6,7 +6,7 @@ frappe.router.on("change", function () {
 function hideListView() {
   const route = frappe.get_route();
 
-  console.log("Current Route:", route);
+  // console.log("Current Route:", route);
 
   if (route && route[0] === "List" && route[1] === "Task") {
     if (!frappe.user.has_role("System Manager")) {
