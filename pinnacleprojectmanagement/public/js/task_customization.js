@@ -28,6 +28,7 @@ frappe.ui.form.on("Task", {
       "Completed",
       "Cancelled",
       "Can't Reproduce",
+      "Close",
     ]);
 
     if (
