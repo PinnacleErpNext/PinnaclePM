@@ -12,13 +12,6 @@ frappe.ui.form.on("Task", {
 
   refresh(frm) {
     // Set status options
-    if (frm.doc.project === "Postgres Migration") {
-      frm.set_df_property("status", "options", [
-        "Open",
-        "Working",
-        "Completed",
-      ]);
-    }
     frm.set_df_property("status", "options", [
       "Backlog",
       "Open",
@@ -30,6 +23,13 @@ frappe.ui.form.on("Task", {
       "Can't Reproduce",
       "Close",
     ]);
+    if (frm.doc.project === "Postgres Migration") {
+      frm.set_df_property("status", "options", [
+        "Open",
+        "Working",
+        "Completed",
+      ]);
+    }
 
     if (
       frappe.user.has_role("Backlog Manager") &&
