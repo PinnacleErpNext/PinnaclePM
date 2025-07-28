@@ -37,11 +37,10 @@ frappe.ui.form.on("Task", {
     ) {
       if (frappe.session.user === "Administrator") return;
       if (frm.is_new()) {
+        frm.set_df_property("status", "options", ["Backlog", "Close"]);
         frm.set_value("status", "Backlog");
       }
 
-      // Make fields read-only
-      frm.set_df_property("status", "read_only", true);
       frm.set_df_property("custom_allotted_to", "read_only", true);
     } else {
       frm.set_df_property("project", "reqd", true);
