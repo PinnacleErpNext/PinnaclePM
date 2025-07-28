@@ -36,10 +36,8 @@ frappe.ui.form.on("Task", {
       frm.doc.custom_allotted_to !== frappe.session.user
     ) {
       if (frappe.session.user === "Administrator") return;
-      if (frm.is_new()) {
-        frm.set_df_property("status", "options", ["Backlog", "Close"]);
-        frm.set_value("status", "Backlog");
-      }
+      frm.set_df_property("status", "options", ["Backlog", "Close"]);
+      frm.set_value("status", "Backlog");
 
       frm.set_df_property("custom_allotted_to", "read_only", true);
     } else {
