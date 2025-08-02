@@ -35,7 +35,11 @@ frappe.ui.form.on("Task", {
       frappe.user.has_role("Backlog Manager") &&
       frm.doc.custom_allotted_to !== frappe.session.user
     ) {
-      if (frappe.session.user === "Administrator") return;
+      if (
+        frappe.session.user === "Administrator" ||
+        frappe.user.has_role("Backlog Manager")
+      )
+        return;
       frm.set_df_property("status", "options", ["Backlog", "Close"]);
       frm.set_value("status", "Backlog");
 
