@@ -37,7 +37,7 @@ frappe.ui.form.on("Task", {
     ) {
       if (
         frappe.session.user === "Administrator" ||
-        frappe.user.has_role("Backlog Manager")
+        (frappe.user.has_role("Backlog Manager")&& frm.doc.project === "Postgres Migration")
       )
         return;
       frm.set_df_property("status", "options", ["Backlog", "Close"]);
