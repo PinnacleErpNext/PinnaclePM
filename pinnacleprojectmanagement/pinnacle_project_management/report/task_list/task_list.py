@@ -112,7 +112,7 @@ def get_data(filters):
 
     # Filter by Task
     if filters and filters.get("task"):
-        conditions.append("name = %(task)s")
+        conditions.append("t.name = %(task)s")
         values["task"] = filters["task"]
 
     # Filter by Assigned & Allotted
