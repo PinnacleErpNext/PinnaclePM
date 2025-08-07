@@ -20,6 +20,12 @@ def get_columns():
             "width": 110,
         },
         {
+            "label": _("Task ID"),
+            "fieldname": "task_id",
+            "fieldtype": "Data",
+            "width": 150,
+        },        
+        {
             "label": _("Module"),
             "fieldname": "module",
             "fieldtype": "Data",
@@ -30,7 +36,7 @@ def get_columns():
             "label": _("Task"),
             "fieldname": "task",
             "fieldtype": "HTML",  # Hyperlinked task names
-            "width": 200,
+            "width": 150,
         },
         {
             "label": _("Assigned"),
@@ -83,6 +89,7 @@ def get_columns():
             "fieldtype": "Date",
             "width": 100,
         },
+
     ]
 
 
@@ -196,7 +203,8 @@ def get_data(filters):
                     t.priority,
                     t.status,
                     t.exp_start_date AS start_date,
-                    t.exp_end_date AS end_date
+                    t.exp_end_date AS end_date,
+                    t.name AS task_id  -- Add this line to fetch Task ID
                 FROM
                     `tabTask` t
                 LEFT JOIN `tabUser` ua ON t.custom_assigned_to = ua.email
