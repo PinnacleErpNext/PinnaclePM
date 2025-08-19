@@ -35,8 +35,8 @@ def get_columns():
         {
             "label": _("Task"),
             "fieldname": "task",
-            "fieldtype": "HTML",  # Hyperlinked task names
-            "width": 150,
+            "fieldtype": "HTML",
+            "width": 500,
         },
         {
             "label": _("Assigned"),
@@ -196,7 +196,7 @@ def get_data(filters):
                 SELECT 
                     t.creation,
                     t.custom_module AS module,
-                    CONCAT('<a href="/app/task/', t.name, '">', t.subject, '</a>') AS task,
+                    CONCAT('<a href="/app/task/', t.name, '">', t.name, ':', t.subject, '</a>') AS task,
                     COALESCE(ua.full_name, t.custom_assigned_to) AS assigned,
                     COALESCE(ua2.full_name, t.custom_allotted_to) AS allotted,
                     t.custom_tag AS tags,
