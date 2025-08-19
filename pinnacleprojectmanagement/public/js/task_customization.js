@@ -37,7 +37,8 @@ frappe.ui.form.on("Task", {
     ) {
       if (
         frappe.session.user === "Administrator" ||
-        (frappe.user.has_role("Backlog Manager")&& frm.doc.project === "Postgres Migration")
+        (frappe.user.has_role("Backlog Manager") &&
+          frm.doc.project === "Postgres Migration")
       )
         return;
       frm.set_df_property("status", "options", ["Backlog", "Close"]);
@@ -151,6 +152,7 @@ frappe.ui.form.on("Task", {
         "custom__pg_setup_app_installation",
         "custom__software_update",
         "custom__data_base_restore",
+        "custom_allotted_to",
       ];
 
       Object.keys(frm.fields_dict).forEach((fieldname) => {
