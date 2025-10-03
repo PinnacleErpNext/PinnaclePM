@@ -10,7 +10,10 @@
  "field_order": [
   "subject",
   "assigned_to",
-  "task_detail"
+  "due_date",
+  "task_detail",
+  "reminder_time",
+  "reminder_interval"
  ],
  "fields": [
   {
@@ -32,12 +35,29 @@
    "fieldname": "task_detail",
    "fieldtype": "Text Editor",
    "label": "Task Detail"
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reminder_interval",
+   "fieldtype": "Table",
+   "label": "Reminder Interval",
+   "options": "Task Assignment Reminder"
+  },
+  {
+   "fieldname": "reminder_time",
+   "fieldtype": "Time",
+   "label": "Reminder Time"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-03 15:04:47.641786",
+ "modified": "2025-10-03 17:33:24.818876",
  "modified_by": "Administrator",
  "module": "Pinnacle Project Management",
  "name": "Task Assignment",

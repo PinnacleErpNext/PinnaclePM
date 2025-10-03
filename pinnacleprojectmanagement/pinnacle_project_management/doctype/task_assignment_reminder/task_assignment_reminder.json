@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-10-03 15:50:16.382077",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "reminder_type",
+  "reminder_value"
+ ],
+ "fields": [
+  {
+   "fieldname": "reminder_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Reminder Type",
+   "options": "Minute\nHour\nWeek\nMonth\nYear"
+  },
+  {
+   "fieldname": "reminder_value",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reminder Value"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-10-03 17:42:15.389174",
+ "modified_by": "Administrator",
+ "module": "Pinnacle Project Management",
+ "name": "Task Assignment Reminder",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
