@@ -8,12 +8,16 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "task_assignment_section",
   "subject",
   "assigned_to",
   "due_date",
   "task_detail",
-  "reminder_time",
-  "reminder_interval"
+  "reminder_section",
+  "remind_at",
+  "reminder_interval",
+  "remind_till",
+  "no_of_occurence"
  ],
  "fields": [
   {
@@ -49,15 +53,35 @@
    "options": "Task Assignment Reminder"
   },
   {
-   "fieldname": "reminder_time",
+   "fieldname": "remind_till",
+   "fieldtype": "Datetime",
+   "label": "Remind Till"
+  },
+  {
+   "fieldname": "no_of_occurence",
+   "fieldtype": "Int",
+   "label": "No Of Occurence"
+  },
+  {
+   "fieldname": "reminder_section",
+   "fieldtype": "Section Break",
+   "label": "Reminder"
+  },
+  {
+   "fieldname": "remind_at",
    "fieldtype": "Time",
-   "label": "Reminder Time"
+   "label": "Remind At"
+  },
+  {
+   "fieldname": "task_assignment_section",
+   "fieldtype": "Section Break",
+   "label": "Task Assignment"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-03 17:33:24.818876",
+ "modified": "2025-10-04 15:44:45.267944",
  "modified_by": "Administrator",
  "module": "Pinnacle Project Management",
  "name": "Task Assignment",
