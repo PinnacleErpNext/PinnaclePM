@@ -169,23 +169,23 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"pinnacleprojectmanagement.tasks.all"
-# 	],
-# 	"daily": [
-# 		"pinnacleprojectmanagement.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"pinnacleprojectmanagement.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"pinnacleprojectmanagement.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"pinnacleprojectmanagement.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+	# "all": [
+	# 	"pinnacleprojectmanagement.tasks.all"
+	# ],
+	# "daily": [
+	# 	"pinnacleprojectmanagement.tasks.daily"
+	# ],
+	"hourly": [
+		"pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.process_task_reminders"
+	],
+	# "weekly": [
+	# 	"pinnacleprojectmanagement.tasks.weekly"
+	# ],
+	# "monthly": [
+	# 	"pinnacleprojectmanagement.tasks.monthly"
+	# ],
+}
 
 # Testing
 # -------

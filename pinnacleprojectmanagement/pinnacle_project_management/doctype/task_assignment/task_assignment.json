@@ -17,7 +17,9 @@
   "remind_at",
   "reminder_interval",
   "remind_till",
-  "no_of_occurence"
+  "no_of_occurence",
+  "last_reminded_at",
+  "reminder_count"
  ],
  "fields": [
   {
@@ -76,12 +78,26 @@
    "fieldname": "task_assignment_section",
    "fieldtype": "Section Break",
    "label": "Task Assignment"
+  },
+  {
+   "fieldname": "last_reminded_at",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Last Reminded At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reminder_count",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Reminder Count",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-04 15:44:45.267944",
+ "modified": "2025-10-04 17:11:10.447021",
  "modified_by": "Administrator",
  "module": "Pinnacle Project Management",
  "name": "Task Assignment",
