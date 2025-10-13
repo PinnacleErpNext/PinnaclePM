@@ -1,4 +1,6 @@
 import frappe
+import json
+
 
 @frappe.whitelist(allow_guest=True)
 def updateUserList(proj, search_text=None):
@@ -17,19 +19,17 @@ def updateUserList(proj, search_text=None):
     user_permissions = frappe.db.sql(query, proj, as_dict=True)
 
     # Extract the email list from user permissions
-    email_list = [item['user'] for item in user_permissions]
+    email_list = [item["user"] for item in user_permissions]
 
     # Fetch users from the database
     users = frappe.db.get_list(
-        'User',
-        filters={
-            'name': ['in', email_list]
-        },
-        fields=['name', 'full_name']  # Include both email (name) and full_name
+        "User",
+        filters={"name": ["in", email_list]},
+        fields=["name", "full_name"],  # Include both email (name) and full_name
     )
 
     # Create a key-value pair of email and full name
-    assignee = {user['name']: user['full_name'] for user in users}
+    assignee = {user["name"]: user["full_name"] for user in users}
 
     # Return the dictionary
     return assignee
@@ -46,16 +46,49 @@ def get_all_nodes(doctype, parent_field, parent_value=None):
     """
     # Fetch child projects
     child_projects = frappe.get_all(
-        'Project',
+        "Project",
         filters={parent_field: parent_value},
-        fields=['name as value', 'project_name as title', 'is_group']
+        fields=["name as value", "project_name as title", "is_group"],
     )
 
     # Fetch tasks linked to the parent project
     tasks = frappe.get_all(
-        'Task',
-        filters={'project': parent_value},
-        fields=['name as value', 'subject as title']
+        "Task",
+        filters={"project": parent_value},
+        fields=["name as value", "subject as title"],
     )
 
     return child_projects + tasks
+
+
+@frappe.whitelist(allow_guest=True)
+def allot_task(task_data):
+    task_data = json.loads(task_data)
+    if (
+        not task_data.get("subject")
+        or not task_data.get("assigned_to")
+        or not task_data.get("due_date")
+        or task_data.get("telegram_id")
+    ):
+        return "Missing required fields"
+    frappe.get_doc(
+        {
+            "doctype": "Task Assignment",
+            "subject": task_data.get("subject"),
+            "assigned_to": task_data.get("assigned_to"),
+            "due_date": task_data.get("due_date"),
+            "created_by": task_data.get("created_by"),
+        }
+    ).insert(ignore_permissions=True)
+    return "Task Created successfully!"
+
+
+@frappe.whitelist(allow_guest=True)
+def authenticate_user(telegram_id):
+    user = frappe.db.get_value(
+        "User", {"telegram_id": telegram_id}, ["name", "full_name"], as_dict=True
+    )
+    if user:
+        return user
+    else:
+        return "User not found"
