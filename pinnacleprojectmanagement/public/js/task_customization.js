@@ -42,7 +42,9 @@ frappe.ui.form.on("Task", {
       )
         return;
       frm.set_df_property("status", "options", ["Backlog", "Close"]);
-      frm.set_value("status", "Backlog");
+      if (frm.is_new()) {
+        frm.set_value("status", "Backlog");
+      }
 
       frm.set_df_property("custom_allotted_to", "read_only", true);
     } else {
