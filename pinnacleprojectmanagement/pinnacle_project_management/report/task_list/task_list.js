@@ -8,6 +8,12 @@ frappe.query_reports["Task List"] = {
       fieldtype: "Date",
     },
     {
+      fieldname: "created_by",
+      label: __("Created By"),
+      fieldtype: "Link",
+      options: "User",
+    },
+    {
       fieldname: "project",
       label: __("Project"),
       fieldtype: "Link",
