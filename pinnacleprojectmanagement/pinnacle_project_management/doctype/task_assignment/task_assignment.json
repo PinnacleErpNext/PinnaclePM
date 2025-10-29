@@ -1,0 +1,151 @@
+{
+ "actions": [],
+ "allow_events_in_timeline": 1,
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "format:TASK-ASS-{#}",
+ "creation": "2025-09-30 13:52:43.232476",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "task_assignment_section",
+  "subject",
+  "assigned_to",
+  "due_date",
+  "task_detail",
+  "reminder_section",
+  "remind_at",
+  "reminder_interval",
+  "remind_till",
+  "no_of_occurence",
+  "last_reminded_at",
+  "reminder_count"
+ ],
+ "fields": [
+  {
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Subject",
+   "reqd": 1
+  },
+  {
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Assigned To",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "task_detail",
+   "fieldtype": "Text Editor",
+   "label": "Task Detail"
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reminder_interval",
+   "fieldtype": "Table",
+   "label": "Reminder Interval",
+   "options": "Task Assignment Reminder"
+  },
+  {
+   "fieldname": "remind_till",
+   "fieldtype": "Datetime",
+   "label": "Remind Till"
+  },
+  {
+   "fieldname": "no_of_occurence",
+   "fieldtype": "Int",
+   "label": "No Of Occurence"
+  },
+  {
+   "fieldname": "reminder_section",
+   "fieldtype": "Section Break",
+   "label": "Reminder"
+  },
+  {
+   "fieldname": "remind_at",
+   "fieldtype": "Time",
+   "label": "Remind At"
+  },
+  {
+   "fieldname": "task_assignment_section",
+   "fieldtype": "Section Break",
+   "label": "Task Assignment"
+  },
+  {
+   "fieldname": "last_reminded_at",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Last Reminded At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reminder_count",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Reminder Count",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-10-04 17:11:10.447021",
+ "modified_by": "Administrator",
+ "module": "Pinnacle Project Management",
+ "name": "Task Assignment",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "subject"
+}

@@ -126,13 +126,13 @@ doctype_list_js = {
 # -----------
 # Permissions evaluated in scripted ways
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+permission_query_conditions = {
+	"Task Assignment": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.get_permission_query_conditions",
+}
+
+has_permission = {
+	"Task Assignment": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.has_permission",
+}
 
 # DocType Class
 # ---------------
@@ -169,23 +169,23 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"pinnacleprojectmanagement.tasks.all"
-# 	],
-# 	"daily": [
-# 		"pinnacleprojectmanagement.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"pinnacleprojectmanagement.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"pinnacleprojectmanagement.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"pinnacleprojectmanagement.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+	# "all": [
+	# 	"pinnacleprojectmanagement.tasks.all"
+	# ],
+	# "daily": [
+	# 	"pinnacleprojectmanagement.tasks.daily"
+	# ],
+	"hourly": [
+		"pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.process_task_reminders"
+	],
+	# "weekly": [
+	# 	"pinnacleprojectmanagement.tasks.weekly"
+	# ],
+	# "monthly": [
+	# 	"pinnacleprojectmanagement.tasks.monthly"
+	# ],
+}
 
 # Testing
 # -------

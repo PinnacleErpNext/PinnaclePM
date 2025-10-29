@@ -20,6 +20,13 @@ def get_columns():
             "width": 110,
         },
         {
+            "label": _("Created By"),
+            "fieldname": "created_by",
+            "fieldtype": "Link",
+            "options": "User",
+            "width": 200,
+        },
+        {
             "label": _("Task ID"),
             "fieldname": "task_id",
             "fieldtype": "Data",
@@ -188,6 +195,12 @@ def get_data(filters):
         conditions.append("Date(t.creation) = %(creation)s")
         values["creation"] = filters["creation"]
 
+    if filters and filters.get("created_by"):
+        conditions.append("t.owner = %(created_by)s")
+        values["created_by"] = filters["created_by"]
+
+    
+
     # Build Condition String
     condition_str = " WHERE " + " AND ".join(conditions) if conditions else ""
 
@@ -195,6 +208,7 @@ def get_data(filters):
     query = f"""
                 SELECT 
                     t.creation,
+                    t.owner AS created_by,
                     t.custom_module AS module,
                     CONCAT('<a href="/app/task/', t.name, '">', t.subject, '</a>') AS task,
                     COALESCE(ua.full_name, t.custom_assigned_to) AS assigned,
