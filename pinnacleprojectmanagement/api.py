@@ -84,11 +84,11 @@ def allot_task(task_data):
 
 
 @frappe.whitelist(allow_guest=True)
-def authenticate_user(telegram_id):
-    user = frappe.db.get_value(
-        "User", {"telegram_id": telegram_id}, ["name", "full_name"], as_dict=True
-    )
-    if user:
-        return user
+def authenticate_user(email):
+    user = frappe.get_doc("User", email)
+    if user and user.enabled:
+        return {"status": "success", "message": "User authenticated","exist": True}
     else:
-        return "User not found"
+        return {"status": "failure", "message": "Invalid or disabled user","exist": False}
+    
+
