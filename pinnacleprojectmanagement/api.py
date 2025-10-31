@@ -85,10 +85,8 @@ def allot_task(task_data):
 
 @frappe.whitelist(allow_guest=True)
 def authenticate_user(email):
-    user = frappe.get_doc("User", email)
-    if user and user.enabled:
-        return {"status": "success", "message": "User authenticated","exist": True}
-    else:
-        return {"status": "failure", "message": "Invalid or disabled user","exist": False}
-    
+    exits = frappe.db.exists("User", email)
+    if not exits:
+        return {"status": "failure", "message": "User does not exist","exist": False}
+    return {"status": "success", "message": "User authenticated successfully","exist": True}
 

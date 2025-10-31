@@ -6,7 +6,7 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
     single_column: true,
   });
 
-  // ---------- Full Dashboard HTML ----------
+  // Full HTML layout
   const dashboard_html = `
 		<div id="task-tabs" class="mb-3">
 			<ul class="nav nav-tabs">
@@ -34,12 +34,12 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
 
   $(page.body).html(dashboard_html);
 
-  // DOM references
   const $tabs = $(page.body).find("#task-tabs");
   const $myTasks = $(page.body).find("#my-tasks");
   const $allottedTasks = $(page.body).find("#allotted-tasks");
 
-  // ---------- Helper: Render Cards ----------
+  // ---------- Helper Functions ----------
+
   function render_cards(parent, stats) {
     parent.empty();
     const cards = [
@@ -65,7 +65,7 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
     cards.forEach((c) => {
       row.append(`
 				<div class="col-md-3 col-sm-6">
-					<div class="card ${c.color}" style="border-radius: 12px;">
+					<div class="card ${c.color}" style="border-radius: 12px; cursor: default;">
 						<div class="card-body text-center">
 							<h4 class="fw-bold mb-1">${c.count}</h4>
 							<div>${c.title}</div>
@@ -77,7 +77,6 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
     parent.append(row);
   }
 
-  // ---------- Helper: Render Task List ----------
   function render_task_list(parent, tasks, type = "my") {
     parent.empty();
 
@@ -89,20 +88,20 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
     }
 
     tasks.forEach((t) => {
-      const due_date = t.due_date
-        ? frappe.datetime.str_to_user(t.due_date)
+      const due_date = t.exp_end_date
+        ? frappe.datetime.str_to_user(t.exp_end_date)
         : "No Due Date";
       const assigned_text =
         type === "my"
           ? `<div class="text-secondary small mt-1">Assigned by: ${
-              t.owner || "-"
+              t.assigned_by || "-"
             }</div>`
           : `<div class="text-secondary small mt-1">Assigned to: ${
               t.assigned_to || "-"
             }</div>`;
 
-      const task_card = `
-				<div class="card mb-2 shadow-sm" style="border-radius: 10px;">
+      const task_card = $(`
+				<div class="card mb-2 shadow-sm" style="border-radius: 10px; cursor: pointer;">
 					<div class="card-body">
 						<div class="d-flex justify-content-between align-items-start">
 							<div>
@@ -110,7 +109,7 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
                   t.subject || "(No Subject)"
                 )}</div>
 								<div class="text-muted small">${frappe.utils.escape_html(
-                  t.task_detail || "No details provided."
+                  t.description || "No details provided."
                 )}</div>
 								${assigned_text}
 							</div>
@@ -120,79 +119,102 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
 						</div>
 					</div>
 				</div>
-			`;
+			`);
+
+      // Redirect on click
+      task_card.on("click", function () {
+        frappe.set_route("Form", "Task Assignment", t.name);
+      });
+
       parent.append(task_card);
     });
   }
 
-  // ---------- Load My Tasks ----------
+  // ---------- Load Functions ----------
+
   function load_my_tasks() {
     frappe.call({
       method: "frappe.client.get_list",
       args: {
         doctype: "Task Assignment",
-        filters: { assigned_to: frappe.session.user },
-        fields: ["name", "subject", "task_detail", "due_date", "owner"],
+        filters: {
+          assigned_to: frappe.session.user,
+          status: ["!=", "Completed"],
+        },
+        fields: [
+          "name",
+          "subject",
+          "task_detail as description",
+          "due_date as exp_end_date",
+          "owner as assigned_by",
+        ],
       },
       callback: function (r) {
         const data = r.message || [];
-
         const stats = {
           overdue: data.filter(
             (d) =>
-              d.due_date &&
-              frappe.datetime.get_diff(frappe.datetime.nowdate(), d.due_date) >
-                0
+              d.exp_end_date &&
+              frappe.datetime.get_diff(
+                frappe.datetime.nowdate(),
+                d.exp_end_date
+              ) > 0
           ).length,
-          today: data.filter((d) => d.due_date === frappe.datetime.nowdate())
-            .length,
+          today: data.filter(
+            (d) => d.exp_end_date === frappe.datetime.nowdate()
+          ).length,
           tomorrow: data.filter(
             (d) =>
               frappe.datetime.get_diff(
-                d.due_date,
+                d.exp_end_date,
                 frappe.datetime.nowdate()
-              ) === -1
+              ) === 1
           ).length,
           pending: data.length,
         };
-
         render_cards($("#my-task-cards"), stats);
         render_task_list($("#my-task-list"), data, "my");
       },
     });
   }
 
-  // ---------- Load Allotted Tasks ----------
   function load_allotted_tasks() {
     frappe.call({
       method: "frappe.client.get_list",
       args: {
         doctype: "Task Assignment",
-        filters: { owner: frappe.session.user },
-        fields: ["name", "subject", "task_detail", "due_date", "assigned_to"],
+        filters: { owner: frappe.session.user, status: ["!=", "Completed"] },
+        fields: [
+          "name",
+          "subject",
+          "task_detail as description",
+          "due_date as exp_end_date",
+          "assigned_to",
+        ],
       },
       callback: function (r) {
         const data = r.message || [];
-
         const stats = {
           overdue: data.filter(
             (d) =>
-              d.due_date &&
-              frappe.datetime.get_diff(frappe.datetime.nowdate(), d.due_date) >
-                0
+              d.exp_end_date &&
+              frappe.datetime.get_diff(
+                frappe.datetime.nowdate(),
+                d.exp_end_date
+              ) > 0
           ).length,
-          today: data.filter((d) => d.due_date === frappe.datetime.nowdate())
-            .length,
+          today: data.filter(
+            (d) => d.exp_end_date === frappe.datetime.nowdate()
+          ).length,
           tomorrow: data.filter(
             (d) =>
               frappe.datetime.get_diff(
-                d.due_date,
+                d.exp_end_date,
                 frappe.datetime.nowdate()
-              ) === -1
+              ) === 1
           ).length,
           pending: data.length,
         };
-
         render_cards($("#allotted-task-cards"), stats);
         render_task_list($("#allotted-task-list"), data, "allotted");
       },

@@ -10,6 +10,7 @@
  "field_order": [
   "task_assignment_section",
   "subject",
+  "status",
   "assigned_to",
   "due_date",
   "task_detail",
@@ -106,12 +107,18 @@
    "fieldname": "remind_time",
    "fieldtype": "Time",
    "label": "Remind Time"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Pending\nCompleted\nOverdue"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-30 18:32:11.400552",
+ "modified": "2025-10-31 17:59:56.060757",
  "modified_by": "Administrator",
  "module": "Pinnacle Project Management",
  "name": "Task Assignment",
@@ -160,6 +167,19 @@
  "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Gray",
+   "title": "Pending"
+  },
+  {
+   "color": "Green",
+   "title": "Completed"
+  },
+  {
+   "color": "Red",
+   "title": "Overdue"
+  }
+ ],
  "title_field": "subject"
 }
