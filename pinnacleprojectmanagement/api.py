@@ -63,76 +63,79 @@ def get_all_nodes(doctype, parent_field, parent_value=None):
 
 @frappe.whitelist(allow_guest=True)
 def allot_task(task_data):
+    """API to create a new Task Assignment document"""
     try:
-        # Parse the incoming JSON string
+        # Parse incoming JSON
         task_data = json.loads(task_data)
 
         # Validate required fields
-        required_fields = ["subject", "assigned_to", "due_date","task_detail", "created_by"]
+        required_fields = [
+            "subject",
+            "assigned_to",
+            "due_date",
+            "task_detail",
+            "created_by",
+        ]
         missing_fields = [f for f in required_fields if not task_data.get(f)]
 
         if missing_fields:
             return {
-                "status": "error",
-                "message": f"Missing required fields: {', '.join(missing_fields)}"
+                "status": 400,
+                "message": f"Missing required fields: {', '.join(missing_fields)}",
             }
 
-        # Create the Task Assignment document
-        doc = frappe.get_doc({
-            "doctype": "Task Assignment",
-            "subject": task_data.get("subject"),
-            "assigned_to": task_data.get("assigned_to"),
-            "due_date": task_data.get("due_date"),
-            "task_detail": task_data.get("task_detail"),
-            "created_by": task_data.get("created_by"),
-        })
+        # Create Task Assignment document
+        doc = frappe.get_doc(
+            {
+                "doctype": "Task Assignment",
+                "subject": task_data["subject"],
+                "assigned_to": task_data["assigned_to"],
+                "due_date": task_data["due_date"],
+                "task_detail": task_data["task_detail"],
+                "created_by": task_data["created_by"],
+            }
+        )
+
         doc.insert(ignore_permissions=True)
         frappe.db.commit()
 
-        # Generate a link to the newly created document
+        # Generate link to the created document
         link = f"/app/task-assignment/{doc.name}"
 
         return {
-            "status": "success",
+            "status": 200,
             "message": "Task created successfully!",
-            "doc":doc.as_dict(),
-            "link": link
+            "doc": doc.as_dict(),
+            "link": link,
         }
+
+    except json.JSONDecodeError:
+        return {"status": 400, "message": "Invalid JSON format"}
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Task Assignment Error")
-        return {
-            "status": "error",
-            "message": str(e)
-        }
-
+        return {"status": 500, "message": str(e)}
 
 
 @frappe.whitelist(allow_guest=True)
 def authenticate_user(email):
+    """API to check if a User exists in the system"""
     try:
-        # Check if user exists
+        if not email:
+            return {"status": 400, "message": "Email is required", "exist": False}
+
+        # Check user existence
         exists = frappe.db.exists("User", email)
 
         if not exists:
-            return {
-                "status": "failure",
-                "message": "User does not exist",
-                "exist": False
-            }
+            return {"status": 404, "message": "User does not exist", "exist": False}
 
         return {
-            "status": "success",
+            "status": 200,
             "message": "User authenticated successfully",
-            "exist": True
+            "exist": True,
         }
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "User Authentication Error")
-        return {
-            "status": "error",
-            "message": str(e),
-            "exist": False
-        }
-
-
+        return {"status": 500, "message": str(e), "exist": False}
