@@ -63,30 +63,76 @@ def get_all_nodes(doctype, parent_field, parent_value=None):
 
 @frappe.whitelist(allow_guest=True)
 def allot_task(task_data):
-    task_data = json.loads(task_data)
-    if (
-        not task_data.get("subject")
-        or not task_data.get("assigned_to")
-        or not task_data.get("due_date")
-        or task_data.get("telegram_id")
-    ):
-        return "Missing required fields"
-    frappe.get_doc(
-        {
+    try:
+        # Parse the incoming JSON string
+        task_data = json.loads(task_data)
+
+        # Validate required fields
+        required_fields = ["subject", "assigned_to", "due_date","task_detail", "created_by"]
+        missing_fields = [f for f in required_fields if not task_data.get(f)]
+
+        if missing_fields:
+            return {
+                "status": "error",
+                "message": f"Missing required fields: {', '.join(missing_fields)}"
+            }
+
+        # Create the Task Assignment document
+        doc = frappe.get_doc({
             "doctype": "Task Assignment",
             "subject": task_data.get("subject"),
             "assigned_to": task_data.get("assigned_to"),
             "due_date": task_data.get("due_date"),
+            "task_detail": task_data.get("task_detail"),
             "created_by": task_data.get("created_by"),
+        })
+        doc.insert(ignore_permissions=True)
+        frappe.db.commit()
+
+        # Generate a link to the newly created document
+        link = f"/app/task-assignment/{doc.name}"
+
+        return {
+            "status": "success",
+            "message": "Task created successfully!",
+            "doc":doc.as_dict(),
+            "link": link
         }
-    ).insert(ignore_permissions=True)
-    return "Task Created successfully!"
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Task Assignment Error")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
 
 
 @frappe.whitelist(allow_guest=True)
 def authenticate_user(email):
-    exits = frappe.db.exists("User", email)
-    if not exits:
-        return {"status": "failure", "message": "User does not exist","exist": False}
-    return {"status": "success", "message": "User authenticated successfully","exist": True}
+    try:
+        # Check if user exists
+        exists = frappe.db.exists("User", email)
+
+        if not exists:
+            return {
+                "status": "failure",
+                "message": "User does not exist",
+                "exist": False
+            }
+
+        return {
+            "status": "success",
+            "message": "User authenticated successfully",
+            "exist": True
+        }
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "User Authentication Error")
+        return {
+            "status": "error",
+            "message": str(e),
+            "exist": False
+        }
+
 
