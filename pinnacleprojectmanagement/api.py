@@ -92,10 +92,10 @@ def allot_task(task_data):
                 "assigned_to": task_data["assigned_to"],
                 "due_date": task_data["due_date"],
                 "task_detail": task_data["task_detail"],
-                "created_by": task_data["created_by"],
+                "owner": task_data["created_by"],
             }
         )
-
+        doc.append("remind_interval", {"reminder_type": "Minute", "reminder_value": 5})
         doc.insert(ignore_permissions=True)
         frappe.db.commit()
 
