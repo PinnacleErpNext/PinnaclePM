@@ -6,19 +6,19 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
   });
 
   const dashboard_html = `
-		<div id="task-tabs" class="mb-3">
-			<ul class="nav nav-tabs">
-				<li class="nav-item">
-					<a class="nav-link active" data-tab="my-tasks" href="#">My Tasks</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" data-tab="allotted-tasks" href="#">Tasks I've Allotted</a>
-				</li>
-			</ul>
-		</div>
+    <div id="task-tabs" class="mb-3">
+      <ul class="nav nav-tabs">
+        <li class="nav-item">
+          <a class="nav-link active" data-tab="my-tasks" href="#">My Tasks</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-tab="allotted-tasks" href="#">Tasks I've Allotted</a>
+        </li>
+      </ul>
+    </div>
 
-		<!-- My Tasks -->
-		<div id="my-tasks">
+    <!-- My Tasks -->
+    <div id="my-tasks">
       <div id="my-task-filters" class="mb-3">
         <div class="row g-3">
           <div class="col-md-4" id="my-filter-task"></div>
@@ -27,12 +27,12 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
         </div>
       </div>
 
-			<div id="my-task-cards" class="mb-3"></div>
-			<div id="my-task-list" class="mt-3"></div>
-		</div>
+      <div id="my-task-cards" class="mb-3"></div>
+      <div id="my-task-list" class="mt-3"></div>
+    </div>
 
-		<!-- Tasks I've Allotted -->
-		<div id="allotted-tasks" style="display:none;">
+    <!-- Tasks I've Allotted -->
+    <div id="allotted-tasks" style="display:none;">
       <div id="allotted-task-filters" class="mb-3">
         <div class="row g-3">
           <div class="col-md-4" id="allotted-filter-task"></div>
@@ -41,16 +41,101 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
         </div>
       </div>
 
-			<div id="allotted-task-cards" class="mb-3"></div>
-			<div id="allotted-task-list" class="mt-3"></div>
-		</div>
-	`;
+      <div id="allotted-task-cards" class="mb-3"></div>
+      <div id="allotted-task-list" class="mt-3"></div>
+    </div>
+  `;
 
   $(page.body).html(dashboard_html);
+
+  // ---------- Inject new compact & modern card styles ----------
+  $("<style>")
+    .text(
+      `
+      /* Summary Card Styling */
+      .summary-card {
+        border-radius: 10px !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease-in-out;
+      }
+
+      .summary-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0px 0px 10px rgba(0,0,0,0.18);
+      }
+
+      /* Active Card */
+      .summary-active-card {
+        outline: 3px solid #000 !important;
+        box-shadow: 0px 0px 12px rgba(0,0,0,0.30) !important;
+        transform: scale(1.04);
+      }
+
+      /* Consistent Card Height */
+      .summary-card .card-body {
+        padding: 15px !important;
+        height: 100px !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .summary-card-title {
+        margin-top: 3px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .summary-row > div {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+      }
+        .summary-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.summary-row .summary-col {
+  padding: 6px;
+  flex: 0 0 20%; /* 5 cards per row on large screens */
+}
+
+@media (max-width: 1199px) {
+  .summary-row .summary-col {
+    flex: 0 0 25%; /* 4 per row */
+  }
+}
+
+@media (max-width: 991px) {
+  .summary-row .summary-col {
+    flex: 0 0 33.33%; /* 3 per row */
+  }
+}
+
+@media (max-width: 767px) {
+  .summary-row .summary-col {
+    flex: 0 0 50%; /* 2 per row */
+  }
+}
+
+@media (max-width: 575px) {
+  .summary-row .summary-col {
+    flex: 0 0 100%; /* 1 per row */
+  }
+}
+
+    `
+    )
+    .appendTo("head");
 
   const $tabs = $("#task-tabs");
   const $myTasks = $("#my-tasks");
   const $allottedTasks = $("#allotted-tasks");
+
+  let active_summary_card = {
+    my: "all",
+    allotted: "all",
+  };
 
   // ----------------- Frappe Controls -----------------
 
@@ -114,20 +199,42 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
     render_input: true,
   });
 
-  // Auto-refresh binding (correct Frappe-safe method)
+  // Bind filters
   function bind_filter(ctrl, handler) {
-    ctrl.$input.on("input", handler);
     ctrl.$input.on("change", handler);
+    ctrl.$input.on("input", handler);
     ctrl.df.onchange = handler;
   }
 
-  bind_filter(my_task_ctrl, load_my_tasks);
-  bind_filter(my_assigned_by_ctrl, load_my_tasks);
-  bind_filter(my_assigned_to_ctrl, load_my_tasks);
+  bind_filter(my_task_ctrl, () => {
+    active_summary_card.my = "all";
+    load_my_tasks();
+  });
 
-  bind_filter(allotted_task_ctrl, load_allotted_tasks);
-  bind_filter(allotted_assigned_by_ctrl, load_allotted_tasks);
-  bind_filter(allotted_assigned_to_ctrl, load_allotted_tasks);
+  bind_filter(my_assigned_by_ctrl, () => {
+    active_summary_card.my = "all";
+    load_my_tasks();
+  });
+
+  bind_filter(my_assigned_to_ctrl, () => {
+    active_summary_card.my = "all";
+    load_my_tasks();
+  });
+
+  bind_filter(allotted_task_ctrl, () => {
+    active_summary_card.allotted = "all";
+    load_allotted_tasks();
+  });
+
+  bind_filter(allotted_assigned_by_ctrl, () => {
+    active_summary_card.allotted = "all";
+    load_allotted_tasks();
+  });
+
+  bind_filter(allotted_assigned_to_ctrl, () => {
+    active_summary_card.allotted = "all";
+    load_allotted_tasks();
+  });
 
   // ----------------- Helper Functions -----------------
 
@@ -153,30 +260,95 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
     };
   }
 
-  function render_cards(parent, stats) {
-    parent.empty();
-    const row = $('<div class="row g-3"></div>');
+  // ----------------- Cards Renderer -----------------
 
-    [
-      { t: "Overdue Tasks", c: stats.overdue, col: "bg-danger text-white" },
-      { t: "Due Today", c: stats.today, col: "bg-warning text-dark" },
-      { t: "Due Tomorrow", c: stats.tomorrow, col: "bg-info text-white" },
-      { t: "Total Pending", c: stats.pending, col: "bg-secondary text-white" },
-    ].forEach((x) => {
-      row.append(`
-        <div class="col-md-3 col-sm-6">
-          <div class="card ${x.col}">
+  function render_cards(parent, stats, type) {
+    parent.empty();
+
+    const cards = [
+      {
+        key: "all",
+        title: "All Tasks",
+        count: stats.pending,
+        color: "bg-success text-white",
+      },
+      {
+        key: "pending",
+        title: "Pending Tasks",
+        count: stats.pending,
+        color: "bg-secondary text-white",
+      },
+      {
+        key: "overdue",
+        title: "Overdue Tasks",
+        count: stats.overdue,
+        color: "bg-danger text-white",
+      },
+      {
+        key: "today",
+        title: "Due Today",
+        count: stats.today,
+        color: "bg-warning text-dark",
+      },
+      {
+        key: "tomorrow",
+        title: "Due Tomorrow",
+        count: stats.tomorrow,
+        color: "bg-info text-white",
+      },
+    ];
+
+    const row = $('<div class="row summary-row g-2"></div>');
+
+    cards.forEach((c) => {
+      const is_active =
+        active_summary_card[type] === c.key ? "summary-active-card" : "";
+
+      const card = $(`
+        <div class="summary-col">
+          <div class="card summary-card ${c.color} ${is_active}">
             <div class="card-body text-center">
-              <h4 class="fw-bold">${x.c}</h4>
-              <div>${x.t}</div>
+              <h4 class="fw-bold mb-1">${c.count}</h4>
+              <div class="summary-card-title">${c.title}</div>
             </div>
           </div>
         </div>
       `);
+
+      card.on("click", () => {
+        active_summary_card[type] = c.key;
+        apply_summary_filter(c.key, type);
+      });
+
+      row.append(card);
     });
 
     parent.append(row);
   }
+
+  // ----------------- Summary Filter Logic -----------------
+
+  function apply_summary_filter(key, type) {
+    const today = frappe.datetime.nowdate();
+    let date_filter = null;
+
+    if (key === "overdue") {
+      date_filter = (d) =>
+        d.exp_end_date && frappe.datetime.get_diff(today, d.exp_end_date) > 0;
+    } else if (key === "today") {
+      date_filter = (d) => d.exp_end_date === today;
+    } else if (key === "tomorrow") {
+      date_filter = (d) =>
+        d.exp_end_date && frappe.datetime.get_diff(d.exp_end_date, today) === 1;
+    } else if (key === "pending" || key === "all") {
+      date_filter = null;
+    }
+
+    if (type === "my") load_my_tasks(date_filter);
+    else load_allotted_tasks(date_filter);
+  }
+
+  // ----------------- Task List -----------------
 
   function render_task_list(parent, tasks, type) {
     parent.empty();
@@ -212,16 +384,15 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
         </div>
       `);
 
-      // 👉 Open Task Assignment in NEW TAB
-      card.on("click", function () {
-        window.open(`/app/task-assignment/${t.name}`, "_blank");
-      });
+      card.on("click", () =>
+        window.open(`/app/task-assignment/${t.name}`, "_blank")
+      );
 
       parent.append(card);
     });
   }
 
-  // ----------------- Filters -----------------
+  // ----------------- Filters Helpers -----------------
 
   function get_my_filters() {
     return {
@@ -239,9 +410,9 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
     };
   }
 
-  // ----------------- Load My Tasks -----------------
+  // ----------------- Load Functions -----------------
 
-  function load_my_tasks() {
+  function load_my_tasks(date_filter = null) {
     const f = get_my_filters();
 
     let filters = {
@@ -268,16 +439,21 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
         ],
       },
       callback: (r) => {
-        const data = r.message;
-        render_cards($("#my-task-cards"), compute_stats(data));
-        render_task_list($("#my-task-list"), data, "my");
+        let full_data = r.message || [];
+
+        // Stats from FULL data (not filtered)
+        render_cards($("#my-task-cards"), compute_stats(full_data), "my");
+
+        // Apply date filter only to list
+        let filtered = full_data;
+        if (date_filter) filtered = full_data.filter(date_filter);
+
+        render_task_list($("#my-task-list"), filtered, "my");
       },
     });
   }
 
-  // ----------------- Load Allotted Tasks -----------------
-
-  function load_allotted_tasks() {
+  function load_allotted_tasks(date_filter = null) {
     const f = get_allotted_filters();
 
     let filters = {
@@ -303,9 +479,20 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
         ],
       },
       callback: (r) => {
-        const data = r.message;
-        render_cards($("#allotted-task-cards"), compute_stats(data));
-        render_task_list($("#allotted-task-list"), data, "allotted");
+        let full_data = r.message || [];
+
+        // Stats from FULL data
+        render_cards(
+          $("#allotted-task-cards"),
+          compute_stats(full_data),
+          "allotted"
+        );
+
+        // Filter only list
+        let filtered = full_data;
+        if (date_filter) filtered = full_data.filter(date_filter);
+
+        render_task_list($("#allotted-task-list"), filtered, "allotted");
       },
     });
   }
@@ -322,58 +509,44 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
       $allottedTasks.hide();
       $myTasks.show();
 
-      // Assigned To = current user (LOCKED)
       my_assigned_to_ctrl.set_value(frappe.session.user);
       my_assigned_to_ctrl.df.read_only = 1;
       my_assigned_to_ctrl.refresh();
 
-      // --- SET QUERY: Only tasks assigned to ME ---
-      my_task_ctrl.df.get_query = function () {
-        return {
-          filters: {
-            assigned_to: frappe.session.user,
-          },
-        };
-      };
-      my_task_ctrl.refresh();
+      my_task_ctrl.df.get_query = () => ({
+        filters: { assigned_to: frappe.session.user },
+      });
 
+      active_summary_card.my = "all";
       load_my_tasks();
     } else {
       $myTasks.hide();
       $allottedTasks.show();
 
-      // Assigned By = current user (LOCKED)
       allotted_assigned_by_ctrl.set_value(frappe.session.user);
       allotted_assigned_by_ctrl.df.read_only = 1;
       allotted_assigned_by_ctrl.refresh();
 
-      // --- SET QUERY: Only tasks I have allotted ---
-      allotted_task_ctrl.df.get_query = function () {
-        return {
-          filters: {
-            owner: frappe.session.user,
-          },
-        };
-      };
+      allotted_task_ctrl.df.get_query = () => ({
+        filters: { owner: frappe.session.user },
+      });
       allotted_task_ctrl.refresh();
 
+      active_summary_card.allotted = "all";
       load_allotted_tasks();
     }
   });
 
-  // ---------- Initial Load (Apply same logic as tab = My Tasks) ----------
+  // ---------- INITIAL LOAD ----------
   my_assigned_to_ctrl.set_value(frappe.session.user);
   my_assigned_to_ctrl.df.read_only = 1;
   my_assigned_to_ctrl.refresh();
 
-  my_task_ctrl.df.get_query = function () {
-    return {
-      filters: {
-        assigned_to: frappe.session.user,
-      },
-    };
-  };
+  my_task_ctrl.df.get_query = () => ({
+    filters: { assigned_to: frappe.session.user },
+  });
   my_task_ctrl.refresh();
 
+  active_summary_card.my = "all";
   load_my_tasks();
 };
