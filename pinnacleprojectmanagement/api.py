@@ -61,7 +61,7 @@ def get_all_nodes(doctype, parent_field, parent_value=None):
     return child_projects + tasks
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def allot_task(task_data):
     """API to create a new Task Assignment document"""
     try:
@@ -117,8 +117,9 @@ def allot_task(task_data):
         return {"status": 500, "message": str(e)}
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def authenticate_user(email):
+
     """API to check if a User exists in the system"""
     try:
         if not email:
@@ -126,7 +127,6 @@ def authenticate_user(email):
 
         # Check user existence
         exists = frappe.db.exists("User", email)
-
         if not exists:
             return {"status": 404, "message": "User does not exist", "exist": False}
 
