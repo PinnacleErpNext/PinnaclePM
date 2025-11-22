@@ -193,7 +193,7 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
         ? frappe.datetime.str_to_user(t.exp_end_date)
         : "No Due Date";
 
-      parent.append(`
+      const card = $(`
         <div class="card mb-2 shadow-sm" style="cursor:pointer;">
           <div class="card-body">
             <div class="fw-bold">${t.subject || "(No Subject)"}</div>
@@ -211,6 +211,13 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
           </div>
         </div>
       `);
+
+      // 👉 Open Task Assignment in NEW TAB
+      card.on("click", function () {
+        window.open(`/app/task-assignment/${t.name}`, "_blank");
+      });
+
+      parent.append(card);
     });
   }
 
