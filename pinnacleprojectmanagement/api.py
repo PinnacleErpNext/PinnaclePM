@@ -60,15 +60,41 @@ def get_all_nodes(doctype, parent_field, parent_value=None):
 
     return child_projects + tasks
 
-
 @frappe.whitelist()
-def allot_task(task_data):
-    """API to create a new Task Assignment document"""
-    try:
-        # Parse incoming JSON
-        task_data = json.loads(task_data)
+def allot_task(task_data=None, **kwargs):
+    """
+    API to create a new Task Assignment document.
+    Works with both JSON and form data.
+    """
 
-        # Validate required fields
+    try:
+        # ---------------------------------------------------------
+        # Step 1: Read task_data from multiple possible sources
+        # ---------------------------------------------------------
+
+        # 1. From form_dict (RPC or form-urlencoded)
+        if not task_data:
+            task_data = frappe.form_dict.get("task_data")
+
+        # 2. From raw JSON body
+        if not task_data and frappe.request and frappe.request.json:
+            task_data = frappe.request.json.get("task_data")
+
+        # 3. If still missing
+        if not task_data:
+            frappe.throw("task_data is required")
+
+        # ---------------------------------------------------------
+        # Step 2: Parse JSON safely
+        # ---------------------------------------------------------
+        try:
+            task_data = frappe.parse_json(task_data)
+        except Exception:
+            return {"status": 400, "message": "Invalid JSON format for task_data"}
+
+        # ---------------------------------------------------------
+        # Step 3: Validate required fields
+        # ---------------------------------------------------------
         required_fields = [
             "subject",
             "assigned_to",
@@ -76,6 +102,7 @@ def allot_task(task_data):
             "task_detail",
             "created_by",
         ]
+
         missing_fields = [f for f in required_fields if not task_data.get(f)]
 
         if missing_fields:
@@ -84,7 +111,9 @@ def allot_task(task_data):
                 "message": f"Missing required fields: {', '.join(missing_fields)}",
             }
 
-        # Create Task Assignment document
+        # ---------------------------------------------------------
+        # Step 4: Create the document
+        # ---------------------------------------------------------
         doc = frappe.get_doc(
             {
                 "doctype": "Task Assignment",
@@ -95,11 +124,19 @@ def allot_task(task_data):
                 "owner": task_data["created_by"],
             }
         )
-        doc.append("reminder_interval", {"reminder_type": "Minute", "reminder_value": 5})
+
+        # Add reminder row
+        doc.append(
+            "reminder_interval",
+            {"reminder_type": "Minute", "reminder_value": 5}
+        )
+
         doc.insert(ignore_permissions=True)
         frappe.db.commit()
 
-        # Generate link to the created document
+        # ---------------------------------------------------------
+        # Step 5: Response with link
+        # ---------------------------------------------------------
         link = f"/app/task-assignment/{doc.name}"
 
         return {
@@ -109,12 +146,17 @@ def allot_task(task_data):
             "link": link,
         }
 
-    except json.JSONDecodeError:
-        return {"status": 400, "message": "Invalid JSON format"}
-
     except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Task Assignment Error")
+        # ---------------------------------------------------------
+        # Step 6: Log all unexpected errors in Error Log
+        # ---------------------------------------------------------
+        frappe.log_error(
+            title="Task Assignment Error",
+            message=frappe.get_traceback()
+        )
+
         return {"status": 500, "message": str(e)}
+
 
 
 @frappe.whitelist()
