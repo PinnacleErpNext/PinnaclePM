@@ -65,7 +65,8 @@ def allot_task(task_data):
     """API to create a new Task Assignment document"""
     try:
         # Parse incoming JSON
-        task_data = json.loads(task_data)
+        if isinstance(task_data, str):
+            task_data = json.loads(task_data)
 
         # Validate required fields
         required_fields = [
