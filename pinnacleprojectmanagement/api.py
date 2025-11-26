@@ -64,7 +64,7 @@ def get_all_nodes(doctype, parent_field, parent_value=None):
 def allot_task(task_data=None, **kwargs):
     """
     API to create a new Task Assignment document.
-    Works with both JSON and form data.
+    Works with both JSON and form data without triggering 415 errors.
     """
 
     try:
@@ -76,11 +76,18 @@ def allot_task(task_data=None, **kwargs):
         if not task_data:
             task_data = frappe.form_dict.get("task_data")
 
-        # 2. From raw JSON body
-        if not task_data and frappe.request and frappe.request.json:
-            task_data = frappe.request.json.get("task_data")
+        # 2. Safe JSON check ONLY if Content-Type is application/json
+        content_type = (frappe.request.headers.get("Content-Type") or "").lower()
 
-        # 3. If still missing
+        if (
+            not task_data
+            and content_type.startswith("application/json")
+        ):
+            req_json = frappe.request.get_json(silent=True)  # prevents 415 errors
+            if req_json:
+                task_data = req_json.get("task_data")
+
+        # 3. If still missing → throw clean error
         if not task_data:
             frappe.throw("task_data is required")
 
@@ -146,7 +153,7 @@ def allot_task(task_data=None, **kwargs):
             "link": link,
         }
 
-    except Exception as e:
+    except Exception:
         # ---------------------------------------------------------
         # Step 6: Log all unexpected errors in Error Log
         # ---------------------------------------------------------
@@ -155,7 +162,8 @@ def allot_task(task_data=None, **kwargs):
             message=frappe.get_traceback()
         )
 
-        return {"status": 500, "message": str(e)}
+        return {"status": 500, "message": "Internal server error. Check error logs."}
+
 
 
 
