@@ -64,9 +64,13 @@ def get_all_nodes(doctype, parent_field, parent_value=None):
 def allot_task(task_data=None):
     """API to create a new Task Assignment document"""
     try:
+        # Log the form data to check if task_data is being passed correctly
+        frappe.logger().info(f"Received form data: {frappe.form_dict}")
+
         if task_data is None:
             # If task_data is not passed as a JSON string, it might be in form data
             task_data = frappe.form_dict.get('task_data')
+            frappe.logger().info(f"task_data extracted from form_dict: {task_data}")
 
         # Check if task_data is still None after checking form_dict
         if task_data is None:
@@ -106,7 +110,6 @@ def allot_task(task_data=None):
                 "owner": task_data["created_by"],
             }
         )
-        # Add reminder interval
         doc.append("reminder_interval", {"reminder_type": "Minute", "reminder_value": 5})
         doc.insert(ignore_permissions=True)
         frappe.db.commit()
@@ -127,7 +130,6 @@ def allot_task(task_data=None):
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Task Assignment Error")
         return {"status": 500, "message": str(e)}
-    
 
 @frappe.whitelist()
 def authenticate_user(email):
