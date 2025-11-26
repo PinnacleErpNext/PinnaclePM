@@ -68,9 +68,16 @@ def allot_task(task_data=None):
             # If task_data is not passed as a JSON string, it might be in form data
             task_data = frappe.form_dict.get('task_data')
 
-        # Ensure task_data is a dictionary
+        # Check if task_data is still None after checking form_dict
+        if task_data is None:
+            return {"status": 400, "message": "No task_data provided"}
+
+        # Ensure task_data is a dictionary (or a string that can be parsed as JSON)
         if isinstance(task_data, str):
-            task_data = json.loads(task_data)
+            try:
+                task_data = json.loads(task_data)
+            except json.JSONDecodeError:
+                return {"status": 400, "message": "Invalid JSON format in task_data"}
 
         # Validate required fields
         required_fields = [
@@ -99,6 +106,7 @@ def allot_task(task_data=None):
                 "owner": task_data["created_by"],
             }
         )
+        # Add reminder interval
         doc.append("reminder_interval", {"reminder_type": "Minute", "reminder_value": 5})
         doc.insert(ignore_permissions=True)
         frappe.db.commit()
