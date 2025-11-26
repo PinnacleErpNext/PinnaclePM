@@ -61,10 +61,14 @@ def get_all_nodes(doctype, parent_field, parent_value=None):
     return child_projects + tasks
 
 @frappe.whitelist()
-def allot_task(task_data):
+def allot_task(task_data=None):
     """API to create a new Task Assignment document"""
     try:
-        # Parse incoming JSON
+        if task_data is None:
+            # If task_data is not passed as a JSON string, it might be in form data
+            task_data = frappe.form_dict.get('task_data')
+
+        # Ensure task_data is a dictionary
         if isinstance(task_data, str):
             task_data = json.loads(task_data)
 
@@ -115,6 +119,7 @@ def allot_task(task_data):
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Task Assignment Error")
         return {"status": 500, "message": str(e)}
+    
 
 @frappe.whitelist()
 def authenticate_user(email):
