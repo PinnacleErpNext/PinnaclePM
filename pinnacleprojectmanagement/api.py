@@ -61,47 +61,13 @@ def get_all_nodes(doctype, parent_field, parent_value=None):
     return child_projects + tasks
 
 @frappe.whitelist()
-def allot_task(task_data=None, **kwargs):
-    """
-    API to create a new Task Assignment document.
-    Works with both JSON and form data without triggering 415 errors.
-    """
-
+def allot_task(task_data):
+    """API to create a new Task Assignment document"""
     try:
-        # ---------------------------------------------------------
-        # Step 1: Read task_data from multiple possible sources
-        # ---------------------------------------------------------
+        # Parse incoming JSON
+        task_data = json.loads(task_data)
 
-        # 1. From form_dict (RPC or form-urlencoded)
-        if not task_data:
-            task_data = frappe.form_dict.get("task_data")
-
-        # 2. Safe JSON check ONLY if Content-Type is application/json
-        content_type = (frappe.request.headers.get("Content-Type") or "").lower()
-
-        if (
-            not task_data
-            and content_type.startswith("application/json")
-        ):
-            req_json = frappe.request.get_json(silent=True)  # prevents 415 errors
-            if req_json:
-                task_data = req_json.get("task_data")
-
-        # 3. If still missing → throw clean error
-        if not task_data:
-            frappe.throw("task_data is required")
-
-        # ---------------------------------------------------------
-        # Step 2: Parse JSON safely
-        # ---------------------------------------------------------
-        try:
-            task_data = frappe.parse_json(task_data)
-        except Exception:
-            return {"status": 400, "message": "Invalid JSON format for task_data"}
-
-        # ---------------------------------------------------------
-        # Step 3: Validate required fields
-        # ---------------------------------------------------------
+        # Validate required fields
         required_fields = [
             "subject",
             "assigned_to",
@@ -109,7 +75,6 @@ def allot_task(task_data=None, **kwargs):
             "task_detail",
             "created_by",
         ]
-
         missing_fields = [f for f in required_fields if not task_data.get(f)]
 
         if missing_fields:
@@ -118,9 +83,7 @@ def allot_task(task_data=None, **kwargs):
                 "message": f"Missing required fields: {', '.join(missing_fields)}",
             }
 
-        # ---------------------------------------------------------
-        # Step 4: Create the document
-        # ---------------------------------------------------------
+        # Create Task Assignment document
         doc = frappe.get_doc(
             {
                 "doctype": "Task Assignment",
@@ -131,19 +94,11 @@ def allot_task(task_data=None, **kwargs):
                 "owner": task_data["created_by"],
             }
         )
-
-        # Add reminder row
-        doc.append(
-            "reminder_interval",
-            {"reminder_type": "Minute", "reminder_value": 5}
-        )
-
+        doc.append("reminder_interval", {"reminder_type": "Minute", "reminder_value": 5})
         doc.insert(ignore_permissions=True)
         frappe.db.commit()
 
-        # ---------------------------------------------------------
-        # Step 5: Response with link
-        # ---------------------------------------------------------
+        # Generate link to the created document
         link = f"/app/task-assignment/{doc.name}"
 
         return {
@@ -153,19 +108,12 @@ def allot_task(task_data=None, **kwargs):
             "link": link,
         }
 
-    except Exception:
-        # ---------------------------------------------------------
-        # Step 6: Log all unexpected errors in Error Log
-        # ---------------------------------------------------------
-        frappe.log_error(
-            title="Task Assignment Error",
-            message=frappe.get_traceback()
-        )
+    except json.JSONDecodeError:
+        return {"status": 400, "message": "Invalid JSON format"}
 
-        return {"status": 500, "message": "Internal server error. Check error logs."}
-
-
-
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Task Assignment Error")
+        return {"status": 500, "message": str(e)}
 
 @frappe.whitelist()
 def authenticate_user(email):
