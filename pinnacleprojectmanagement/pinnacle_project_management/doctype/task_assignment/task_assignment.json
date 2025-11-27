@@ -12,6 +12,7 @@
   "subject",
   "status",
   "assigned_to",
+  "assigned_by",
   "due_date",
   "task_detail",
   "reminder_section",
@@ -113,12 +114,19 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "Pending\nCompleted\nOverdue"
+  },
+  {
+   "fieldname": "assigned_by",
+   "fieldtype": "Link",
+   "label": "Assigned By",
+   "options": "User",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-31 17:59:56.060757",
+ "modified": "2025-11-27 18:01:17.784914",
  "modified_by": "Administrator",
  "module": "Pinnacle Project Management",
  "name": "Task Assignment",

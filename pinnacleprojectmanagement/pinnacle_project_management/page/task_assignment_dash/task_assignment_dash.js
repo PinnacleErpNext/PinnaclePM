@@ -421,7 +421,7 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
     };
 
     if (f.task) filters["name"] = f.task;
-    if (f.assigned_by) filters["owner"] = f.assigned_by;
+    if (f.assigned_by) filters["assigned_by"] = f.assigned_by;
     if (f.assigned_to) filters["assigned_to"] = f.assigned_to;
 
     frappe.call({
@@ -434,7 +434,7 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
           "subject",
           "task_detail as description",
           "due_date as exp_end_date",
-          "owner as assigned_by",
+          "assigned_by",
           "assigned_to",
         ],
       },
@@ -457,7 +457,7 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
     const f = get_allotted_filters();
 
     let filters = {
-      owner: frappe.session.user,
+      assigned_by: frappe.session.user,
       status: ["!=", "Completed"],
     };
 
@@ -475,7 +475,7 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
           "task_detail as description",
           "due_date as exp_end_date",
           "assigned_to",
-          "owner as assigned_by",
+          "assigned_by",
         ],
       },
       callback: (r) => {
@@ -528,7 +528,7 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
       allotted_assigned_by_ctrl.refresh();
 
       allotted_task_ctrl.df.get_query = () => ({
-        filters: { owner: frappe.session.user },
+        filters: { assigned_by: frappe.session.user },
       });
       allotted_task_ctrl.refresh();
 

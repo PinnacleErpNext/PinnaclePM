@@ -64,42 +64,39 @@ def get_all_nodes(doctype, parent_field, parent_value=None):
 def allot_task(task_data=None):
     """API to create a new Task Assignment document"""
     try:
-        # Log the form data to check if task_data is being passed correctly
-        frappe.logger().info(f"Received form data: {frappe.form_dict}")
+        # Log incoming request
+        frappe.logger().info(f"[Bot Task API] Received form data: {frappe.form_dict}")
 
-        if task_data is None:
-            # If task_data is not passed as a JSON string, it might be in form data
-            task_data = frappe.form_dict.get('task_data')
-            frappe.logger().info(f"task_data extracted from form_dict: {task_data}")
+        # Extract task_data if not provided
+        if not task_data:
+            task_data = frappe.form_dict.get("task_data")
+            frappe.logger().info(f"[Bot Task API] Extracted task_data from form_dict: {task_data}")
 
-        # Check if task_data is still None after checking form_dict
-        if task_data is None:
-            return {"status": 400, "message": "No task_data provided"}
+        # If still empty, return error
+        if not task_data:
+            msg = "No task_data provided"
+            frappe.logger().error(f"[Bot Task API] {msg}")
+            return {"status": 400, "message": msg}
 
-        # Ensure task_data is a dictionary (or a string that can be parsed as JSON)
+        # Parse JSON if sent as string
         if isinstance(task_data, str):
             try:
                 task_data = json.loads(task_data)
-            except json.JSONDecodeError:
-                return {"status": 400, "message": "Invalid JSON format in task_data"}
+            except json.JSONDecodeError as e:
+                msg = "Invalid JSON format in task_data"
+                frappe.logger().error(f"[Bot Task API] JSON error: {e}")
+                return {"status": 400, "message": msg}
 
         # Validate required fields
-        required_fields = [
-            "subject",
-            "assigned_to",
-            "due_date",
-            "task_detail",
-            "created_by",
-        ]
-        missing_fields = [f for f in required_fields if not task_data.get(f)]
+        required_fields = ["subject", "assigned_to", "due_date", "task_detail", "created_by"]
+        missing = [field for field in required_fields if not task_data.get(field)]
 
-        if missing_fields:
-            return {
-                "status": 400,
-                "message": f"Missing required fields: {', '.join(missing_fields)}",
-            }
+        if missing:
+            msg = f"Missing required fields: {', '.join(missing)}"
+            frappe.logger().error(f"[Bot Task API] {msg}")
+            return {"status": 400, "message": msg}
 
-        # Create Task Assignment document
+        # Create Task Assignment record
         doc = frappe.get_doc(
             {
                 "doctype": "Task Assignment",
@@ -107,42 +104,55 @@ def allot_task(task_data=None):
                 "assigned_to": task_data["assigned_to"],
                 "due_date": task_data["due_date"],
                 "task_detail": task_data["task_detail"],
-                "owner": task_data["created_by"],
+                "assigned_by": task_data["created_by"],
             }
         )
-        doc.append("reminder_interval", {"reminder_type": "Minute", "reminder_value": 5})
+
+        # Add reminder interval row
+        doc.append(
+            "reminder_interval",
+            {"reminder_type": "Minute", "reminder_value": 5}
+        )
+
         doc.insert(ignore_permissions=True)
         frappe.db.commit()
 
-        # Generate link to the created document
-        link = f"/app/task-assignment/{doc.name}"
+        frappe.logger().info(f"[Bot Task API] Task created successfully: {doc.name}")
 
         return {
             "status": 200,
             "message": "Task created successfully!",
             "doc": doc.as_dict(),
-            "link": link,
+            "link": f"/app/task-assignment/{doc.name}",
         }
 
-    except json.JSONDecodeError:
-        return {"status": 400, "message": "Invalid JSON format"}
-
     except Exception as e:
+        # Log full traceback
+        frappe.logger().error(f"[Bot Task API] Unexpected error: {e}")
         frappe.log_error(frappe.get_traceback(), "Task Assignment Error")
         return {"status": 500, "message": str(e)}
 
+
 @frappe.whitelist()
 def authenticate_user(email):
-
     """API to check if a User exists in the system"""
     try:
+        frappe.logger().info(f"[Bot Auth API] Incoming request with email: {email}")
+
         if not email:
-            return {"status": 400, "message": "Email is required", "exist": False}
+            msg = "Email is required"
+            frappe.logger().warning(f"[Bot Auth API] {msg}")
+            return {"status": 400, "message": msg, "exist": False}
 
         # Check user existence
         exists = frappe.db.exists("User", email)
+
         if not exists:
+            msg = f"User '{email}' does not exist"
+            frappe.logger().warning(f"[Bot Auth API] {msg}")
             return {"status": 404, "message": "User does not exist", "exist": False}
+
+        frappe.logger().info(f"[Bot Auth API] User '{email}' authenticated successfully")
 
         return {
             "status": 200,
@@ -151,5 +161,6 @@ def authenticate_user(email):
         }
 
     except Exception as e:
+        frappe.logger().error(f"[Bot Auth API] Unexpected Error: {e}")
         frappe.log_error(frappe.get_traceback(), "User Authentication Error")
         return {"status": 500, "message": str(e), "exist": False}
