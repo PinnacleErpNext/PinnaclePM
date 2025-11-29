@@ -70,6 +70,7 @@ def after_migrate():
                 "Backlog",
                 "Open",
                 "Working",
+                "Renewal Pending",
                 "Pending Review",
                 "Overdue",
                 "Completed",

@@ -16,6 +16,7 @@ frappe.ui.form.on("Task", {
       "Backlog",
       "Open",
       "Working",
+      "Renewal Pending",
       "Pending Review",
       "Overdue",
       "Completed",
@@ -28,6 +29,7 @@ frappe.ui.form.on("Task", {
         "Open",
         "Working",
         "Completed",
+        "Renewal Pending",
       ]);
     }
 
@@ -77,6 +79,7 @@ frappe.ui.form.on("Task", {
         "Open",
         "Working",
         "Completed",
+        "Renewal Pending",
       ]);
     }
     frappe.db
@@ -103,6 +106,7 @@ frappe.ui.form.on("Task", {
         "Open",
         "Working",
         "Completed",
+        "Renewal Pending",
       ]);
     }
     applyBreadcrumbs(frm);

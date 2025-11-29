@@ -72,6 +72,7 @@ frappe.query_reports["Task List"] = {
         "Backlog",
         "Open",
         "Working",
+        "Renewal Pending",
         "Pending Review",
         "Overdue",
         "Completed",
