@@ -73,6 +73,17 @@ frappe.ui.form.on("Task", {
   },
 
   project(frm) {
+    frm.set_df_property("status", "options", [
+      "Backlog",
+      "Open",
+      "Working",
+      "Pending Review",
+      "Overdue",
+      "Completed",
+      "Cancelled",
+      "Can't Reproduce",
+      "Close",
+    ]);
     if (frm.doc.project === "Postgres Migration") {
       frm.set_df_property("status", "options", [
         "Open",
