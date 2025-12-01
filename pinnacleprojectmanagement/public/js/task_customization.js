@@ -16,7 +16,6 @@ frappe.ui.form.on("Task", {
       "Backlog",
       "Open",
       "Working",
-      "Renewal Pending",
       "Pending Review",
       "Overdue",
       "Completed",
