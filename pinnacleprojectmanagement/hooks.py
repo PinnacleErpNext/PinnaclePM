@@ -31,7 +31,8 @@ before_migrate = "pinnacleprojectmanagement.utils.after_migrate"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/pinnacleprojectmanagement/css/pinnacleprojectmanagement.css"
 app_include_js = [
-    "/assets/pinnacleprojectmanagement/js/hide_list_view.js"
+    "/assets/pinnacleprojectmanagement/js/hide_list_view.js",
+    "/assets/pinnacleprojectmanagement/js/reminder_popup.js",
     # "/assets/pinnacleprojectmanagement/js/breadcrumbs_manager.js"
 ]
 
@@ -127,11 +128,11 @@ doctype_list_js = {
 # Permissions evaluated in scripted ways
 
 permission_query_conditions = {
-	"Task Assignment": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.get_permission_query_conditions",
+    "Task Assignment": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.get_permission_query_conditions",
 }
 
 has_permission = {
-	"Task Assignment": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.has_permission",
+    "Task Assignment": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.has_permission",
 }
 
 # DocType Class
@@ -170,21 +171,26 @@ doc_events = {
 # ---------------
 
 scheduler_events = {
-	# "all": [
-	# 	"pinnacleprojectmanagement.tasks.all"
-	# ],
-	# "daily": [
-	# 	"pinnacleprojectmanagement.tasks.daily"
-	# ],
-	"hourly": [
-		"pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.process_task_reminders"
-	],
-	# "weekly": [
-	# 	"pinnacleprojectmanagement.tasks.weekly"
-	# ],
-	# "monthly": [
-	# 	"pinnacleprojectmanagement.tasks.monthly"
-	# ],
+    "cron": {
+        "*/1 * * * *": [
+            "pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.test_cron"
+        ]
+    }
+    # "all": [
+    # 	"pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.process_task_reminders"
+    # ],
+    # "daily": [
+    # 	"pinnacleprojectmanagement.tasks.daily"
+    # ],
+    # "hourly": [
+    # 	"pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.process_task_reminders"
+    # ],
+    # "weekly": [
+    # 	"pinnacleprojectmanagement.tasks.weekly"
+    # ],
+    # "monthly": [
+    # 	"pinnacleprojectmanagement.tasks.monthly"
+    # ],
 }
 
 # Testing
