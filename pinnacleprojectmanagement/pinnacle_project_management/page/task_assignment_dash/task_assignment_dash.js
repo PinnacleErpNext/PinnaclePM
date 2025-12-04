@@ -21,9 +21,11 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
     <div id="my-tasks">
       <div id="my-task-filters" class="mb-3">
         <div class="row g-3">
-          <div class="col-md-4" id="my-filter-task"></div>
-          <div class="col-md-4" id="my-filter-assigned-by"></div>
-          <div class="col-md-4" id="my-filter-assigned-to"></div>
+          <div class="col-md-2" id="my-filter-task"></div>
+          <div class="col-md-2" id="my-filter-assigned-by"></div>
+          <div class="col-md-2" id="my-filter-assigned-to"></div>
+          <div class="col-md-2" id="my-filter-status"></div>
+          <div class="col-md-4" id="my-filter-date-range"></div>
         </div>
       </div>
 
@@ -35,9 +37,11 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
     <div id="allotted-tasks" style="display:none;">
       <div id="allotted-task-filters" class="mb-3">
         <div class="row g-3">
-          <div class="col-md-4" id="allotted-filter-task"></div>
-          <div class="col-md-4" id="allotted-filter-assigned-by"></div>
-          <div class="col-md-4" id="allotted-filter-assigned-to"></div>
+          <div class="col-md-2" id="allotted-filter-task"></div>
+          <div class="col-md-2" id="allotted-filter-assigned-by"></div>
+          <div class="col-md-2" id="allotted-filter-assigned-to"></div>
+          <div class="col-md-2" id="allotted-filter-status"></div>
+          <div class="col-md-4" id="allotted-filter-date-range"></div>
         </div>
       </div>
 
@@ -48,83 +52,83 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
 
   $(page.body).html(dashboard_html);
 
-  // ---------- Inject new compact & modern card styles ----------
+  // ---------- Injected CSS ----------
   $("<style>")
     .text(
       `
-      /* Summary Card Styling */
+      /* ----------------------------
+         ORIGINAL SUMMARY CARD DESIGN
+         ---------------------------- */
       .summary-card {
         border-radius: 10px !important;
         cursor: pointer !important;
-        transition: all 0.15s ease-in-out;
+        transition: 0.15s ease-in-out;
+        opacity: 0.85;
+        width: 100%;
+        height: 110px !important; /* equal height */
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .summary-card:hover {
         transform: scale(1.03);
         box-shadow: 0px 0px 10px rgba(0,0,0,0.18);
+        opacity: 1;
       }
 
-      /* Active Card */
       .summary-active-card {
-        outline: 3px solid #000 !important;
-        box-shadow: 0px 0px 12px rgba(0,0,0,0.30) !important;
+        outline: 1px solid #666 !important;
         transform: scale(1.04);
+        opacity: 1 !important;
+        box-shadow: 0px 0px 12px rgba(0,0,0,0.30);
       }
 
-      /* Consistent Card Height */
-      .summary-card .card-body {
-        padding: 15px !important;
-        height: 100px !important;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+      .summary-row { 
+        display: flex; 
+        flex-wrap: wrap; 
       }
 
-      .summary-card-title {
-        margin-top: 3px;
-        font-size: 14px;
-        font-weight: 500;
+      .summary-col { 
+        padding: 6px;            /* spacing left-right */
+        margin-bottom: 12px;     /* spacing bottom */
+        flex: 0 0 20%; 
       }
 
-      .summary-row > div {
-        padding-left: 8px !important;
-        padding-right: 8px !important;
+      @media (max-width:1199px){.summary-col{flex:0 0 25%;}}
+      @media (max-width:991px){.summary-col{flex:0 0 33.33%;}}
+      @media (max-width:767px){.summary-col{flex:0 0 50%;}}
+      @media (max-width:575px){.summary-col{flex:0 0 100%;}}
+
+      /* ----------------------------
+         CUSTOM CARD COLORS + BLACK TEXT
+         ---------------------------- */
+
+      .summary-card.bg-success {
+        background-color: rgb(247, 255, 243) !important; /* Light Green */
+        color: #000 !important;
       }
-        .summary-row {
-  display: flex;
-  flex-wrap: wrap;
-}
 
-.summary-row .summary-col {
-  padding: 6px;
-  flex: 0 0 20%; /* 5 cards per row on large screens */
-}
+      .summary-card.bg-secondary {
+        background-color: rgb(255, 247, 239) !important; /* Light Orange */
+        color: #000 !important;
+      }
 
-@media (max-width: 1199px) {
-  .summary-row .summary-col {
-    flex: 0 0 25%; /* 4 per row */
-  }
-}
+      .summary-card.bg-danger {
+        background-color: rgb(255, 246, 246) !important; /* Light Red */
+        color: #000 !important;
+      }
 
-@media (max-width: 991px) {
-  .summary-row .summary-col {
-    flex: 0 0 33.33%; /* 3 per row */
-  }
-}
+      .summary-card.bg-warning {
+        background-color: rgb(255, 255, 241) !important; /* Light Yellow */
+        color: #000 !important;
+      }
 
-@media (max-width: 767px) {
-  .summary-row .summary-col {
-    flex: 0 0 50%; /* 2 per row */
-  }
-}
-
-@media (max-width: 575px) {
-  .summary-row .summary-col {
-    flex: 0 0 100%; /* 1 per row */
-  }
-}
-
-    `
+      .summary-card.bg-info {
+        background-color: rgb(245, 249, 255) !important; /* Light Blue */
+        color: #000 !important;
+      }
+`
     )
     .appendTo("head");
 
@@ -132,10 +136,7 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
   const $myTasks = $("#my-tasks");
   const $allottedTasks = $("#allotted-tasks");
 
-  let active_summary_card = {
-    my: "all",
-    allotted: "all",
-  };
+  let active_summary_card = { my: "all", allotted: "all" };
 
   // ----------------- Frappe Controls -----------------
 
@@ -151,24 +152,34 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
 
   const my_assigned_by_ctrl = frappe.ui.form.make_control({
     parent: $("#my-filter-assigned-by"),
-    df: {
-      fieldtype: "Link",
-      options: "User",
-      label: "Assigned By",
-    },
+    df: { fieldtype: "Link", options: "User", label: "Assigned By" },
     render_input: true,
   });
 
   const my_assigned_to_ctrl = frappe.ui.form.make_control({
     parent: $("#my-filter-assigned-to"),
+    df: { fieldtype: "Link", options: "User", label: "Assigned To" },
+    render_input: true,
+  });
+
+  const my_status_ctrl = frappe.ui.form.make_control({
+    parent: $("#my-filter-status"),
     df: {
-      fieldtype: "Link",
-      options: "User",
-      label: "Assigned To",
+      fieldtype: "Select",
+      label: "Status",
+      options: ["", "Pending", "Completed", "Overdue"].join("\n"),
     },
     render_input: true,
   });
 
+  // THE NEW DATE RANGE FIELD
+  const my_date_range_ctrl = frappe.ui.form.make_control({
+    parent: $("#my-filter-date-range"),
+    df: { fieldtype: "DateRange", label: "Due Date Range" },
+    render_input: true,
+  });
+
+  // ---------- ALLOTTED ----------
   const allotted_task_ctrl = frappe.ui.form.make_control({
     parent: $("#allotted-filter-task"),
     df: {
@@ -181,60 +192,68 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
 
   const allotted_assigned_by_ctrl = frappe.ui.form.make_control({
     parent: $("#allotted-filter-assigned-by"),
-    df: {
-      fieldtype: "Link",
-      options: "User",
-      label: "Assigned By",
-    },
+    df: { fieldtype: "Link", options: "User", label: "Assigned By" },
     render_input: true,
   });
 
   const allotted_assigned_to_ctrl = frappe.ui.form.make_control({
     parent: $("#allotted-filter-assigned-to"),
+    df: { fieldtype: "Link", options: "User", label: "Assigned To" },
+    render_input: true,
+  });
+
+  const allotted_status_ctrl = frappe.ui.form.make_control({
+    parent: $("#allotted-filter-status"),
     df: {
-      fieldtype: "Link",
-      options: "User",
-      label: "Assigned To",
+      fieldtype: "Select",
+      label: "Status",
+      options: ["", "Pending", "Completed", "Overdue"].join("\n"),
     },
     render_input: true,
   });
 
-  // Bind filters
+  // NEW RANGE PICKER
+  const allotted_date_range_ctrl = frappe.ui.form.make_control({
+    parent: $("#allotted-filter-date-range"),
+    df: { fieldtype: "DateRange", label: "Due Date Range" },
+    render_input: true,
+  });
+
   function bind_filter(ctrl, handler) {
-    ctrl.$input.on("change", handler);
-    ctrl.$input.on("input", handler);
-    ctrl.df.onchange = handler;
+    if (ctrl && ctrl.$input) {
+      ctrl.$input.on("change", handler);
+      ctrl.$input.on("input", handler);
+    }
+    if (ctrl && ctrl.df) ctrl.df.onchange = handler;
   }
 
-  bind_filter(my_task_ctrl, () => {
-    active_summary_card.my = "all";
-    load_my_tasks();
-  });
+  // MY FILTER BINDS
+  [
+    my_task_ctrl,
+    my_assigned_by_ctrl,
+    my_assigned_to_ctrl,
+    my_status_ctrl,
+    my_date_range_ctrl,
+  ].forEach((ctrl) =>
+    bind_filter(ctrl, () => {
+      active_summary_card.my = "all";
+      load_my_tasks();
+    })
+  );
 
-  bind_filter(my_assigned_by_ctrl, () => {
-    active_summary_card.my = "all";
-    load_my_tasks();
-  });
-
-  bind_filter(my_assigned_to_ctrl, () => {
-    active_summary_card.my = "all";
-    load_my_tasks();
-  });
-
-  bind_filter(allotted_task_ctrl, () => {
-    active_summary_card.allotted = "all";
-    load_allotted_tasks();
-  });
-
-  bind_filter(allotted_assigned_by_ctrl, () => {
-    active_summary_card.allotted = "all";
-    load_allotted_tasks();
-  });
-
-  bind_filter(allotted_assigned_to_ctrl, () => {
-    active_summary_card.allotted = "all";
-    load_allotted_tasks();
-  });
+  // ALLOTTED FILTER BINDS
+  [
+    allotted_task_ctrl,
+    allotted_assigned_by_ctrl,
+    allotted_assigned_to_ctrl,
+    allotted_status_ctrl,
+    allotted_date_range_ctrl,
+  ].forEach((ctrl) =>
+    bind_filter(ctrl, () => {
+      active_summary_card.allotted = "all";
+      load_allotted_tasks();
+    })
+  );
 
   // ----------------- Helper Functions -----------------
 
@@ -303,7 +322,6 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
     cards.forEach((c) => {
       const is_active =
         active_summary_card[type] === c.key ? "summary-active-card" : "";
-
       const card = $(`
         <div class="summary-col">
           <div class="card summary-card ${c.color} ${is_active}">
@@ -314,12 +332,10 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
           </div>
         </div>
       `);
-
       card.on("click", () => {
         active_summary_card[type] = c.key;
         apply_summary_filter(c.key, type);
       });
-
       row.append(card);
     });
 
@@ -340,8 +356,6 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
     } else if (key === "tomorrow") {
       date_filter = (d) =>
         d.exp_end_date && frappe.datetime.get_diff(d.exp_end_date, today) === 1;
-    } else if (key === "pending" || key === "all") {
-      date_filter = null;
     }
 
     if (type === "my") load_my_tasks(date_filter);
@@ -352,10 +366,9 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
 
   function render_task_list(parent, tasks, type) {
     parent.empty();
-
     if (!tasks.length) {
       parent.append(
-        '<div class="text-muted text-center mt-4">No tasks found.</div>'
+        `<div class="text-muted text-center mt-4">No tasks found.</div>`
       );
       return;
     }
@@ -387,7 +400,6 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
       card.on("click", () =>
         window.open(`/app/task-assignment/${t.name}`, "_blank")
       );
-
       parent.append(card);
     });
   }
@@ -399,6 +411,8 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
       task: my_task_ctrl.get_value(),
       assigned_by: my_assigned_by_ctrl.get_value(),
       assigned_to: my_assigned_to_ctrl.get_value(),
+      status: my_status_ctrl.get_value(),
+      date_range: my_date_range_ctrl.get_value(), // array [from, to]
     };
   }
 
@@ -407,6 +421,8 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
       task: allotted_task_ctrl.get_value(),
       assigned_by: allotted_assigned_by_ctrl.get_value(),
       assigned_to: allotted_assigned_to_ctrl.get_value(),
+      status: allotted_status_ctrl.get_value(),
+      date_range: allotted_date_range_ctrl.get_value(),
     };
   }
 
@@ -415,10 +431,19 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
   function load_my_tasks(date_filter = null) {
     const f = get_my_filters();
 
-    let filters = {
-      assigned_to: frappe.session.user,
-      status: ["!=", "Completed"],
-    };
+    let filters = { assigned_to: frappe.session.user };
+
+    // STATUS FILTER
+    if (f.status === "Pending") filters["status"] = ["!=", "Completed"];
+    else if (f.status === "Completed") filters["status"] = "Completed";
+    else if (f.status === "Overdue")
+      filters["due_date"] = ["<", frappe.datetime.nowdate()];
+    else filters["status"] = ["!=", "Completed"];
+
+    // DATE RANGE FILTER
+    if (f.date_range && f.date_range.length === 2) {
+      filters["due_date"] = ["between", f.date_range];
+    }
 
     if (f.task) filters["name"] = f.task;
     if (f.assigned_by) filters["assigned_by"] = f.assigned_by;
@@ -437,17 +462,14 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
           "assigned_by",
           "assigned_to",
         ],
+        order_by: "due_date asc",
+        limit_page_length: 1000,
       },
       callback: (r) => {
         let full_data = r.message || [];
-
-        // Stats from FULL data (not filtered)
         render_cards($("#my-task-cards"), compute_stats(full_data), "my");
 
-        // Apply date filter only to list
-        let filtered = full_data;
-        if (date_filter) filtered = full_data.filter(date_filter);
-
+        let filtered = date_filter ? full_data.filter(date_filter) : full_data;
         render_task_list($("#my-task-list"), filtered, "my");
       },
     });
@@ -456,10 +478,17 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
   function load_allotted_tasks(date_filter = null) {
     const f = get_allotted_filters();
 
-    let filters = {
-      assigned_by: frappe.session.user,
-      status: ["!=", "Completed"],
-    };
+    let filters = { assigned_by: frappe.session.user };
+
+    if (f.status === "Pending") filters["status"] = ["!=", "Completed"];
+    else if (f.status === "Completed") filters["status"] = "Completed";
+    else if (f.status === "Overdue")
+      filters["due_date"] = ["<", frappe.datetime.nowdate()];
+    else filters["status"] = ["!=", "Completed"];
+
+    if (f.date_range && f.date_range.length === 2) {
+      filters["due_date"] = ["between", f.date_range];
+    }
 
     if (f.task) filters["name"] = f.task;
     if (f.assigned_to) filters["assigned_to"] = f.assigned_to;
@@ -474,30 +503,27 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
           "subject",
           "task_detail as description",
           "due_date as exp_end_date",
-          "assigned_to",
           "assigned_by",
+          "assigned_to",
         ],
+        order_by: "due_date asc",
+        limit_page_length: 1000,
       },
       callback: (r) => {
         let full_data = r.message || [];
-
-        // Stats from FULL data
         render_cards(
           $("#allotted-task-cards"),
           compute_stats(full_data),
           "allotted"
         );
 
-        // Filter only list
-        let filtered = full_data;
-        if (date_filter) filtered = full_data.filter(date_filter);
-
+        let filtered = date_filter ? full_data.filter(date_filter) : full_data;
         render_task_list($("#allotted-task-list"), filtered, "allotted");
       },
     });
   }
 
-  // ---------- Tab Switching ----------
+  // ---------- TAB SWITCHING ----------
   $tabs.on("click", ".nav-link", function (e) {
     e.preventDefault();
     const tab = $(this).data("tab");
@@ -512,12 +538,6 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
       my_assigned_to_ctrl.set_value(frappe.session.user);
       my_assigned_to_ctrl.df.read_only = 1;
       my_assigned_to_ctrl.refresh();
-
-      my_task_ctrl.df.get_query = () => ({
-        filters: { assigned_to: frappe.session.user },
-      });
-
-      active_summary_card.my = "all";
       load_my_tasks();
     } else {
       $myTasks.hide();
@@ -526,13 +546,6 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
       allotted_assigned_by_ctrl.set_value(frappe.session.user);
       allotted_assigned_by_ctrl.df.read_only = 1;
       allotted_assigned_by_ctrl.refresh();
-
-      allotted_task_ctrl.df.get_query = () => ({
-        filters: { assigned_by: frappe.session.user },
-      });
-      allotted_task_ctrl.refresh();
-
-      active_summary_card.allotted = "all";
       load_allotted_tasks();
     }
   });
@@ -541,11 +554,6 @@ frappe.pages["task-assignment-dash"].on_page_load = function (wrapper) {
   my_assigned_to_ctrl.set_value(frappe.session.user);
   my_assigned_to_ctrl.df.read_only = 1;
   my_assigned_to_ctrl.refresh();
-
-  my_task_ctrl.df.get_query = () => ({
-    filters: { assigned_to: frappe.session.user },
-  });
-  my_task_ctrl.refresh();
 
   active_summary_card.my = "all";
   load_my_tasks();
