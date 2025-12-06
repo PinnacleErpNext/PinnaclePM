@@ -96,6 +96,12 @@ def get_columns():
             "fieldtype": "Date",
             "width": 100,
         },
+        {
+            "label": _("Task Progress"),
+            "fieldname": "progress",
+            "fieldtype": "Percent",
+            "width": 100,
+        }
 
     ]
 
@@ -218,7 +224,8 @@ def get_data(filters):
                     t.status,
                     t.exp_start_date AS start_date,
                     t.exp_end_date AS end_date,
-                    t.name AS task_id  -- Add this line to fetch Task ID
+                    t.name AS task_id,  -- Add this line to fetch Task ID
+                    t.progress AS progress
                 FROM
                     `tabTask` t
                 LEFT JOIN `tabUser` ua ON t.custom_assigned_to = ua.email
