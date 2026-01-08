@@ -26,6 +26,12 @@ frappe.query_reports["Task List"] = {
       options: [],
     },
     {
+      fieldname: "type",
+      label: __("Type"),
+      fieldtype: "Link",
+      options: "Task Type",
+    },
+    {
       fieldname: "task",
       label: __("Task"),
       fieldtype: "Link",

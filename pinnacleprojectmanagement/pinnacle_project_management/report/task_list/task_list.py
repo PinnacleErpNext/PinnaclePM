@@ -180,6 +180,11 @@ def get_data(filters):
             conditions.append("custom_tag IN %(tags)s")
             values["tags"] = tuple(tag_list)
 
+    # Filter by Task Type
+    if filters and filters.get("type"):
+        conditions.append("t.type = %(type)s")
+        values["type"] = filters["type"]
+     
     # Filter by Status, Priority, Start Date, End Date
     if filters and filters.get("status"):
         conditions.append("status = %(status)s")
