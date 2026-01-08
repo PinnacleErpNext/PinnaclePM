@@ -7,7 +7,7 @@ app_license = "mit"
 
 
 before_migrate = "pinnacleprojectmanagement.utils.after_migrate"
-
+after_migrate = "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.disable_core_task_overdue_job"
 
 # Apps
 # ------------------
@@ -175,13 +175,15 @@ scheduler_events = {
         "*/1 * * * *": [
             "pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.test_cron"
         ]
-    }
+    },
     # "all": [
     # 	"pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.process_task_reminders"
     # ],
-    # "daily": [
-    # 	"pinnacleprojectmanagement.tasks.daily"
-    # ],
+    "daily": [
+    	"pinnacleprojectmanagement.tasks.daily",
+        "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.custom_set_tasks_as_overdue"
+
+    ],
     # "hourly": [
     # 	"pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.process_task_reminders"
     # ],

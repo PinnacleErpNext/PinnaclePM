@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-from frappe.utils import get_url_to_form
+from frappe.utils import get_url_to_form, getdate, today
 
 def on_update(doc, method):
     # Extract unique identifiers (e.g., email addresses) from current followers
@@ -69,3 +69,29 @@ def on_update(doc, method):
         """
         frappe.sendmail(recipients=recipients, subject=subject, message=message)
 
+
+def custom_set_tasks_as_overdue():
+    tasks = frappe.get_all(
+        "Task",
+        filters={"status": ["not in", ["Cancelled", "Completed", "Close"]]},
+        fields=["name", "status", "review_date"],
+    )
+
+    for task in tasks:
+        # Preserve core Pending Review behaviour
+        if task.status == "Pending Review":
+            if task.review_date and getdate(task.review_date) > getdate(today()):
+                continue
+
+        frappe.get_doc("Task", task.name).update_status()
+
+
+def disable_core_task_overdue_job():
+    job_name = "task.set_tasks_as_overdue"
+
+    if frappe.db.exists("Scheduled Job Type", job_name):
+        job = frappe.get_doc("Scheduled Job Type", job_name)
+        if not job.stopped:
+            job.stopped = 1
+            job.save()
+            frappe.db.commit()
