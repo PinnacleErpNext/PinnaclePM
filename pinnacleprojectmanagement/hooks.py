@@ -180,7 +180,6 @@ scheduler_events = {
     # 	"pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.process_task_reminders"
     # ],
     "daily": [
-    	"pinnacleprojectmanagement.tasks.daily",
         "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.custom_set_tasks_as_overdue"
 
     ],
