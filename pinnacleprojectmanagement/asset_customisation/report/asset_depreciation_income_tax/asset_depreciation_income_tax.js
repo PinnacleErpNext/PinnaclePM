@@ -33,7 +33,7 @@ frappe.query_reports["Asset Depreciation Income Tax"] = {
                     __("This will create Asset Block Depreciation for the selected Fiscal Year. Continue?"),
                     function () {
                         frappe.call({
-                            method: "pinnacleprojectmanagement.pinnacle_project_management.report.asset_depreciation_income_tax.asset_depreciation_income_tax.create_asset_block_dep",
+                            method: "pinnacleprojectmanagement.asset_customisation.report.asset_depreciation_income_tax.asset_depreciation_income_tax.create_asset_block_dep",
                             args: {
                                 fiscal_year: filters.fiscal_year,
                                 company: filters.company
