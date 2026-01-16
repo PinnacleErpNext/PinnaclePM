@@ -51,7 +51,8 @@ app_include_js = [
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Task": "public/js/task_customization.js"}
+doctype_js = {"Task": "public/js/task_customization.js",
+              "Asset":"asset_customisation/doctype/assets/assets.js"}
 doctype_list_js = {
     "Task": "public/js/task_customization.js",
 }

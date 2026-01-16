@@ -1,0 +1,19 @@
+{
+ "content": null,
+ "creation": "2025-12-03 17:50:53.901368",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-01-15 17:45:01.422348",
+ "modified_by": "Administrator",
+ "module": "Asset Customisation",
+ "name": "asset-report",
+ "owner": "Administrator",
+ "page_name": "asset-report",
+ "roles": [],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Asset Report"
+}

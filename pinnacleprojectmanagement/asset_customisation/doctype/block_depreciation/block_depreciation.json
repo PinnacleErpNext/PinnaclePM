@@ -1,0 +1,120 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-27 18:34:32.691233",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_jr5y",
+  "asset_block",
+  "rate_of_depreciation",
+  "opening_wdv",
+  "asset_added_h1",
+  "asset_added_h2",
+  "total",
+  "sold_assets",
+  "net_total",
+  "depreciation",
+  "closing_wdv"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_jr5y",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "asset_block",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Asset Block",
+   "options": "Asset Block"
+  },
+  {
+   "columns": 1,
+   "fieldname": "rate_of_depreciation",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Rate of depreciation"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "opening_wdv",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Opening WDV"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "asset_added_h1",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Asset Added 1st Half"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "asset_added_h2",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Asset Added 2nd Half"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "sold_assets",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Sold Assets"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "net_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Net Total"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "depreciation",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Depreciation"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "closing_wdv",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Closing WDV"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-15 18:56:04.326378",
+ "modified_by": "Administrator",
+ "module": "Asset Customisation",
+ "name": "Block Depreciation",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

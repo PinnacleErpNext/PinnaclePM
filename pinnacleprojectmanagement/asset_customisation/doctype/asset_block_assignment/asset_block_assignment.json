@@ -1,0 +1,43 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-02 16:24:39.842834",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "fiscal_year",
+  "asset_block"
+ ],
+ "fields": [
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "With effect from",
+   "options": "Fiscal Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "asset_block",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Asset Block",
+   "options": "Asset Block",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-15 17:41:30.982268",
+ "modified_by": "Administrator",
+ "module": "Asset Customisation",
+ "name": "Asset Block Assignment",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

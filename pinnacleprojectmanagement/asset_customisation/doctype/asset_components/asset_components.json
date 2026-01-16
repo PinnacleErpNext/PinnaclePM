@@ -1,0 +1,129 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:ACC-COMP-{#}",
+ "creation": "2025-11-18 18:10:23.911218",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "components_section",
+  "serial_no",
+  "component",
+  "component_name",
+  "brand_name",
+  "vendor",
+  "date_of_addition",
+  "warrent_start",
+  "warrent_end",
+  "specification",
+  "amended_from",
+  "asset"
+ ],
+ "fields": [
+  {
+   "fieldname": "components_section",
+   "fieldtype": "Section Break",
+   "label": "Components"
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Data",
+   "label": "Serial No."
+  },
+  {
+   "fieldname": "component",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Component",
+   "link_filters": "[[\"Item\",\"custom_is_component\",\"=\",1]]",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "component.item_name",
+   "fieldname": "component_name",
+   "fieldtype": "Data",
+   "label": "Component Name"
+  },
+  {
+   "fieldname": "brand_name",
+   "fieldtype": "Data",
+   "label": "Brand Name"
+  },
+  {
+   "fieldname": "vendor",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Vendor"
+  },
+  {
+   "fieldname": "date_of_addition",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date of Addition"
+  },
+  {
+   "fieldname": "warrent_start",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Warrent Start"
+  },
+  {
+   "fieldname": "warrent_end",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Warrent End"
+  },
+  {
+   "fieldname": "specification",
+   "fieldtype": "Data",
+   "label": "Specification"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Asset Components",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "label": "Asset",
+   "options": "Asset",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-01-15 17:33:20.602894",
+ "modified_by": "Administrator",
+ "module": "Asset Customisation",
+ "name": "Asset Components",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

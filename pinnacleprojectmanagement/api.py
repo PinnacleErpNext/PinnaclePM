@@ -164,3 +164,65 @@ def authenticate_user(email):
         frappe.logger().error(f"[Bot Auth API] Unexpected Error: {e}")
         frappe.log_error(frappe.get_traceback(), "User Authentication Error")
         return {"status": 500, "message": str(e), "exist": False}
+    
+@frappe.whitelist()
+def get_assets(filter_text=None, asset_category=None, component_filter=None, custodian_filter=None):
+
+    AC_TABLE = "tabAsset Components"   # confirmed table
+
+    conditions = []
+    params = []
+
+    # Text search
+    if filter_text:
+        like = f"%{filter_text}%"
+        conditions.append("""
+            (a.custom_asset_id LIKE %s
+            OR a.custom_custodian_name LIKE %s
+            OR a.item_name LIKE %s)
+        """)
+        params.extend([like, like, like])
+
+    # Category filter
+    if asset_category:
+        conditions.append("a.asset_category = %s")
+        params.append(asset_category)
+
+    # Custodian filter
+    if custodian_filter:
+        conditions.append("a.custom_custodian_name = %s")
+        params.append(custodian_filter)
+
+    # Component filter
+    if component_filter:
+        conditions.append(f"""
+            EXISTS (
+                SELECT 1 FROM `{AC_TABLE}` ac2
+                WHERE ac2.asset = a.name
+                  AND ac2.component_name = %s
+            )
+        """)
+        params.append(component_filter)
+
+    where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
+
+    query = f"""
+        SELECT  
+            a.name AS id,
+            a.custom_asset_id AS asset_id,
+            a.custom_custodian_name AS used_by,
+            a.item_name AS item_name,
+            a.asset_category AS asset_category,
+            COALESCE(
+                JSON_OBJECTAGG(ac.component_name, ac.specification),
+                '{{}}'
+            ) AS asset_components
+        FROM `tabAsset` a
+        LEFT JOIN `{AC_TABLE}` ac 
+            ON ac.asset = a.name
+        {where_clause}
+        GROUP BY a.name
+        ORDER BY a.custom_asset_id
+    """
+
+    return frappe.db.sql(query, tuple(params), as_dict=True)
