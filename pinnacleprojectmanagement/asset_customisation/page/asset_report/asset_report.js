@@ -34,18 +34,16 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
         <input id="filter_text" class="form-control" placeholder="optional">
       </div>
 
-      <div class="col-md-2 form-group d-flex align-items-end">
-        <button id="fetch_records" class="btn btn-primary">Get Records</button>
+      <div class="col-md-4 form-group d-flex align-items-end">
+        <button id="fetch_records" class="btn btn-primary mr-2">Get Records</button>
+        <button id="download_excel" class="btn btn-success">Download Report</button>
       </div>
 
-      <div class="col-md-2 form-group d-flex align-items-end">
-        <button id="download_excel" class="btn btn-success">Download Excel</button>
-      </div>
 
     </div>
 
     <div style="max-height:600px; overflow:auto; position:relative;">
-      <table id="record_table" class="table table-bordered mt-3" style="min-width:1400px; border-collapse:separate;">
+      <table id="record_table" class="table table-bordered mt-3" style="min-width:1500px; border-collapse:separate;">
         <thead></thead>
         <tbody id="asset_table_body"></tbody>
       </table>
@@ -112,6 +110,72 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
   const $tbody = $form.find("#asset_table_body");
 
   // ---------------------------
+  // Populate dropdown filters
+  // ---------------------------
+
+  // Asset Categories (only submitted assets)
+  frappe.call({
+    method: "frappe.client.get_list",
+    args: {
+      doctype: "Asset",
+      fields: ["asset_category"],
+      filters: { docstatus: 1 },
+      limit_page_length: 1000,
+    },
+    callback: function (res) {
+      const categories = new Set();
+      (res.message || []).forEach((r) => {
+        if (r.asset_category) categories.add(r.asset_category);
+      });
+
+      categories.forEach((cat) => {
+        $("#category_filter").append(`<option value="${cat}">${cat}</option>`);
+      });
+    },
+  });
+
+  // Components
+  frappe.call({
+    method: "frappe.client.get_list",
+    args: {
+      doctype: "Asset Components",
+      fields: ["component_name"],
+      limit_page_length: 1000,
+    },
+    callback: function (res) {
+      const comps = new Set();
+      (res.message || []).forEach((r) => {
+        if (r.component_name) comps.add(r.component_name);
+      });
+
+      comps.forEach((c) => {
+        $("#component_filter").append(`<option value="${c}">${c}</option>`);
+      });
+    },
+  });
+
+  // Custodians (only submitted assets)
+  frappe.call({
+    method: "frappe.client.get_list",
+    args: {
+      doctype: "Asset",
+      fields: ["custom_custodian_name"],
+      filters: { docstatus: 1 },
+      limit_page_length: 1000,
+    },
+    callback: function (res) {
+      const custodians = new Set();
+      (res.message || []).forEach((r) => {
+        if (r.custom_custodian_name) custodians.add(r.custom_custodian_name);
+      });
+
+      custodians.forEach((c) => {
+        $("#custodian_filter").append(`<option value="${c}">${c}</option>`);
+      });
+    },
+  });
+
+  // ---------------------------
   // Helpers
   // ---------------------------
 
@@ -131,7 +195,6 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
       }
     }
 
-    // normalize keys: lowercase + remove spaces + remove special chars (-,/,_)
     const normalized = {};
     Object.keys(obj).forEach((k) => {
       const nk = k.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -144,13 +207,12 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
         return normalized[nk];
       }
     }
-
     return "N/A";
   }
 
-  // ----------------------------------------
+  // ---------------------------
   // Fetch records
-  // ----------------------------------------
+  // ---------------------------
   $form.find("#fetch_records").click(function () {
     frappe.dom.freeze("Loading...");
 
@@ -172,38 +234,39 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
       },
     });
   });
-  
-$form.find("#download_excel").click(function () {
-  frappe.dom.freeze("Preparing Excel...");
 
-  frappe.call({
-    method: "pinnacleprojectmanagement.api.download_assets_excel",
-    args: {
-      filter_text: $("#filter_text").val() || "",
-      asset_category: $("#category_filter").val() || "",
-      component_filter: $("#component_filter").val() || "",
-      custodian_filter: $("#custodian_filter").val() || "",
-    },
-    callback: function (res) {
-      frappe.dom.unfreeze();
+  // ---------------------------
+  // Download Excel
+  // ---------------------------
+  $form.find("#download_excel").click(function () {
+    frappe.dom.freeze("Preparing Excel...");
 
-      if (res.message) {
-        window.location.href = res.message; // download file
-      } else {
-        frappe.msgprint("Failed to generate Excel.");
-      }
-    },
-    error: () => {
-      frappe.dom.unfreeze();
-      frappe.msgprint("Error while downloading Excel.");
-    }
+    frappe.call({
+      method: "pinnacleprojectmanagement.api.download_assets_excel",
+      args: {
+        filter_text: $("#filter_text").val() || "",
+        asset_category: $("#category_filter").val() || "",
+        component_filter: $("#component_filter").val() || "",
+        custodian_filter: $("#custodian_filter").val() || "",
+      },
+      callback: function (res) {
+        frappe.dom.unfreeze();
+        if (res.message) {
+          window.location.href = res.message;
+        } else {
+          frappe.msgprint("Failed to generate Excel.");
+        }
+      },
+      error: () => {
+        frappe.dom.unfreeze();
+        frappe.msgprint("Error while downloading Excel.");
+      },
+    });
   });
-});
 
-  // ----------------------------------------
+  // ---------------------------
   // Render Table
-  // ----------------------------------------
-
+  // ---------------------------
   function render_table(data) {
     const headers = [
       { label: "ID", cls: "col-id" },
@@ -243,24 +306,23 @@ $form.find("#download_excel").click(function () {
       }
 
       const tr = `
-      <tr>
-        <td class="col-id"><a href="/app/asset/${row.id}" target="_blank">${row.id}</a></td>
-        <td class="col-assetid">${safe(row.asset_id)}</td>
-        <td>${safe(row.item_name)}</td>
-        <td class="col-custodian">${safe(row.used_by)}</td>
-        <td>${safe(row.asset_category)}</td>
+        <tr>
+          <td class="col-id"><a href="/app/asset/${row.id}" target="_blank">${row.id}</a></td>
+          <td class="col-assetid">${safe(row.asset_id)}</td>
+          <td>${safe(row.item_name)}</td>
+          <td class="col-custodian">${safe(row.used_by)}</td>
+          <td>${safe(row.asset_category)}</td>
 
-        <td>${safe(getComponentValue(comp, ["processor"]))}</td>
-        <td>${safe(getComponentValue(comp, ["ram"]))}</td>
-        <td>${safe(getComponentValue(comp, ["harddisk", "hard disk", "hdd"]))}</td>
-        <td>${safe(getComponentValue(comp, ["motherboard", "mother board", "mb"]))}</td>
+          <td>${safe(getComponentValue(comp, ["processor"]))}</td>
+          <td>${safe(getComponentValue(comp, ["ram"]))}</td>
+          <td>${safe(getComponentValue(comp, ["harddisk", "hard disk", "hdd"]))}</td>
+          <td>${safe(getComponentValue(comp, ["motherboard", "mother board", "mb"]))}</td>
 
-        <td>${safe(getComponentValue(comp, ["keyboard"]))}</td>
-        <td>${safe(getComponentValue(comp, ["mouse"]))}</td>
-        <td>${safe(getComponentValue(comp, ["charger", "poweradapter"]))}</td>
-        <td>${safe(getComponentValue(comp, ["Wi-fi MAC Address","wifi mac address","wifi mac","mac address","wireless mac",]),)}</td>
-
-      </tr>
+          <td>${safe(getComponentValue(comp, ["keyboard"]))}</td>
+          <td>${safe(getComponentValue(comp, ["mouse"]))}</td>
+          <td>${safe(getComponentValue(comp, ["charger", "poweradapter"]))}</td>
+          <td>${safe(getComponentValue(comp, ["Wi-fi MAC Address", "wifi mac address", "wifi mac", "mac address", "wireless mac"]))}</td>
+        </tr>
       `;
       $tbody.append(tr);
     });
