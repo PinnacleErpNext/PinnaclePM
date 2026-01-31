@@ -1,5 +1,8 @@
 import frappe
 import json
+from openpyxl import Workbook
+from frappe.utils.file_manager import save_file
+from frappe.utils import get_site_path
 
 
 @frappe.whitelist(allow_guest=True)
@@ -168,12 +171,14 @@ def authenticate_user(email):
 @frappe.whitelist()
 def get_assets(filter_text=None, asset_category=None, component_filter=None, custodian_filter=None):
 
-    AC_TABLE = "tabAsset Components"   # confirmed table
+    AC_TABLE = "tabAsset Components"
 
     conditions = []
     params = []
 
-    # Text search
+    # ✅ Only submitted Assets
+    conditions.append("a.docstatus = 1")
+
     if filter_text:
         like = f"%{filter_text}%"
         conditions.append("""
@@ -183,46 +188,123 @@ def get_assets(filter_text=None, asset_category=None, component_filter=None, cus
         """)
         params.extend([like, like, like])
 
-    # Category filter
     if asset_category:
         conditions.append("a.asset_category = %s")
         params.append(asset_category)
 
-    # Custodian filter
     if custodian_filter:
         conditions.append("a.custom_custodian_name = %s")
         params.append(custodian_filter)
 
-    # Component filter
     if component_filter:
-        conditions.append(f"""
+        conditions.append("""
             EXISTS (
-                SELECT 1 FROM `{AC_TABLE}` ac2
+                SELECT 1 FROM `tabAsset Components` ac2
                 WHERE ac2.asset = a.name
-                  AND ac2.component_name = %s
+                AND ac2.component_name = %s
             )
         """)
         params.append(component_filter)
 
-    where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
+    where_clause = "WHERE " + " AND ".join(conditions)
 
     query = f"""
         SELECT  
             a.name AS id,
             a.custom_asset_id AS asset_id,
             a.custom_custodian_name AS used_by,
-            a.item_name AS item_name,
-            a.asset_category AS asset_category,
+            a.item_name,
+            a.asset_category,
+
             COALESCE(
-                JSON_OBJECTAGG(ac.component_name, ac.specification),
+                JSON_OBJECTAGG(
+                    LOWER(REPLACE(REPLACE(ac.component_name,' ',''),'-','')),
+                    ac.specification
+                ),
                 '{{}}'
             ) AS asset_components
+
         FROM `tabAsset` a
-        LEFT JOIN `{AC_TABLE}` ac 
-            ON ac.asset = a.name
+        LEFT JOIN `{AC_TABLE}` ac ON ac.asset = a.name
         {where_clause}
-        GROUP BY a.name
+
+        GROUP BY 
+            a.name, 
+            a.custom_asset_id, 
+            a.custom_custodian_name, 
+            a.item_name, 
+            a.asset_category
+
         ORDER BY a.custom_asset_id
     """
 
-    return frappe.db.sql(query, tuple(params), as_dict=True)
+    return frappe.db.sql(query, params, as_dict=True)
+
+
+
+@frappe.whitelist()
+def download_assets_excel(filter_text=None, asset_category=None, component_filter=None, custodian_filter=None):
+
+    data = get_assets(filter_text, asset_category, component_filter, custodian_filter)
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Asset Report"
+
+    headers = [
+        "ID", "Asset ID", "Item Name", "Custodian", "Asset Category",
+        "Processor", "RAM", "Hard Disk", "Mother Board",
+        "Keyboard", "Mouse", "Charger", "WIFI-MAC Address"
+    ]
+    ws.append(headers)
+
+    for row in data:
+        comp = {}
+        if row.get("asset_components"):
+            try:
+                comp = json.loads(row["asset_components"])
+            except:
+                comp = {}
+
+        def get_val(keys):
+            normalized = {}
+            for k, v in comp.items():
+                nk = k.lower().replace(" ", "").replace("-", "")
+                normalized[nk] = v
+
+            for key in keys:
+                nk = key.lower().replace(" ", "").replace("-", "")
+                if nk in normalized:
+                    return normalized[nk]
+            return ""
+
+        ws.append([
+            row.get("id") or "N/A",
+            row.get("asset_id") or "N/A",
+            row.get("item_name") or "N/A",
+            row.get("used_by") or "N/A",
+            row.get("asset_category") or "N/A",
+            get_val(["processor"]) or "N/A",
+            get_val(["ram"]) or "N/A",
+            get_val(["harddisk","hdd"]) or "N/A",
+            get_val(["motherboard","mother board"]) or "N/A",
+            get_val(["keyboard"]) or "N/A",
+            get_val(["mouse"]) or "N/A",
+            get_val(["charger"]) or "N/A",
+            get_val(["wifi mac address","wi-fi mac address","mac address"]) or "N/A"
+        ])
+
+    file_name = "Asset_Report.xlsx"
+    file_path = get_site_path("private", "files", file_name)
+
+    wb.save(file_path)
+
+    file_doc = save_file(
+        file_name,
+        open(file_path, "rb").read(),
+        None,
+        None,
+        is_private=1
+    )
+
+    return file_doc.file_url

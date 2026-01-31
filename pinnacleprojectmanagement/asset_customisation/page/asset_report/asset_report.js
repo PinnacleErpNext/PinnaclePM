@@ -38,52 +38,72 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
         <button id="fetch_records" class="btn btn-primary">Get Records</button>
       </div>
 
+      <div class="col-md-2 form-group d-flex align-items-end">
+        <button id="download_excel" class="btn btn-success">Download Excel</button>
+      </div>
+
     </div>
 
     <div style="max-height:600px; overflow:auto; position:relative;">
-      <table id="record_table" class="table table-bordered mt-3" style="min-width:1100px; border-collapse:separate;">
+      <table id="record_table" class="table table-bordered mt-3" style="min-width:1400px; border-collapse:separate;">
         <thead></thead>
         <tbody id="asset_table_body"></tbody>
       </table>
     </div>
 
     <style>
-      #record_table th, #record_table td {
+      #record_table {
+        border-collapse: separate;
+      }
+
+      #record_table th,
+      #record_table td {
         background: white;
         border: 1px solid #ddd;
         padding: 8px;
         white-space: nowrap;
       }
 
+      /* Sticky header */
+      #record_table thead th {
+        position: sticky;
+        top: 0;
+        background: #f8f9fa;
+        z-index: 5;
+      }
+
       /* Sticky ID column */
-      #record_table th.col-id, #record_table td.col-id {
+      #record_table th.col-id,
+      #record_table td.col-id {
         position: sticky;
         left: 0;
-        z-index: 3;
         background: #f8f9fa;
+        z-index: 6;
       }
 
       /* Sticky Asset ID column */
-      #record_table th.col-assetid, #record_table td.col-assetid {
+      #record_table th.col-assetid,
+      #record_table td.col-assetid {
         position: sticky;
         left: var(--col-id-width);
-        z-index: 3;
         background: #f8f9fa;
+        z-index: 6;
       }
 
       /* Sticky Custodian column */
-      #record_table th.col-custodian, #record_table td.col-custodian {
+      #record_table th.col-custodian,
+      #record_table td.col-custodian {
         position: sticky;
         left: calc(var(--col-id-width) + var(--col-assetid-width));
-        z-index: 3;
         background: #f8f9fa;
+        z-index: 6;
       }
 
-      #record_table thead th {
-        top: 0;
-        position: sticky;
-        background: #f8f9fa;
-        z-index: 4;
+      /* Corner header cells */
+      #record_table thead th.col-id,
+      #record_table thead th.col-assetid,
+      #record_table thead th.col-custodian {
+        z-index: 10;
       }
     </style>
   `).appendTo(page.body);
@@ -92,41 +112,41 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
   const $tbody = $form.find("#asset_table_body");
 
   // ---------------------------
-  // Populate dropdown filters
+  // Helpers
   // ---------------------------
 
-  // Asset Categories
-  frappe.call({
-    method: "frappe.client.get_list",
-    args: { doctype: "Asset", fields: ["asset_category"], limit_page_length: 999 },
-    callback: function (res) {
-      const categories = new Set();
-      (res.message || []).forEach(r => { if (r.asset_category) categories.add(r.asset_category); });
-      [...categories].forEach(cat => $("#category_filter").append(`<option value="${cat}">${cat}</option>`));
-    }
-  });
+  function safe(v) {
+    if (!v || v === null || v === undefined || v === "") return "N/A";
+    return v;
+  }
 
-  // Components
-  frappe.call({
-    method: "frappe.client.get_list",
-    args: { doctype: "Asset Components", fields: ["component_name"], limit_page_length: 999 },
-    callback: function (res) {
-      const comps = new Set();
-      (res.message || []).forEach(r => { if (r.component_name) comps.add(r.component_name); });
-      [...comps].forEach(c => $("#component_filter").append(`<option value="${c}">${c}</option>`));
-    }
-  });
+  function getComponentValue(obj, keys) {
+    if (!obj) return "N/A";
 
-  // Custodians
-  frappe.call({
-    method: "frappe.client.get_list",
-    args: { doctype: "Asset", fields: ["custom_custodian_name"], limit_page_length: 999 },
-    callback: function (res) {
-      const custodians = new Set();
-      (res.message || []).forEach(r => { if (r.custom_custodian_name) custodians.add(r.custom_custodian_name); });
-      [...custodians].forEach(c => $("#custodian_filter").append(`<option value="${c}">${c}</option>`));
+    if (typeof obj === "string") {
+      try {
+        obj = JSON.parse(obj);
+      } catch {
+        return "N/A";
+      }
     }
-  });
+
+    // normalize keys: lowercase + remove spaces + remove special chars (-,/,_)
+    const normalized = {};
+    Object.keys(obj).forEach((k) => {
+      const nk = k.toLowerCase().replace(/[^a-z0-9]/g, "");
+      normalized[nk] = obj[k];
+    });
+
+    for (let k of keys) {
+      const nk = k.toLowerCase().replace(/[^a-z0-9]/g, "");
+      if (normalized[nk] !== undefined && normalized[nk] !== "") {
+        return normalized[nk];
+      }
+    }
+
+    return "N/A";
+  }
 
   // ----------------------------------------
   // Fetch records
@@ -140,36 +160,45 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
         filter_text: $("#filter_text").val() || "",
         asset_category: $("#category_filter").val() || "",
         component_filter: $("#component_filter").val() || "",
-        custodian_filter: $("#custodian_filter").val() || ""
+        custodian_filter: $("#custodian_filter").val() || "",
       },
       callback: function (res) {
         frappe.dom.unfreeze();
         render_table(res.message || []);
       },
-      error: () => { frappe.dom.unfreeze(); frappe.msgprint("Failed to fetch data."); }
+      error: () => {
+        frappe.dom.unfreeze();
+        frappe.msgprint("Failed to fetch data.");
+      },
     });
   });
+  
+$form.find("#download_excel").click(function () {
+  frappe.dom.freeze("Preparing Excel...");
 
-  // ----------------------------------------
-  // Helpers
-  // ----------------------------------------
+  frappe.call({
+    method: "pinnacleprojectmanagement.api.download_assets_excel",
+    args: {
+      filter_text: $("#filter_text").val() || "",
+      asset_category: $("#category_filter").val() || "",
+      component_filter: $("#component_filter").val() || "",
+      custodian_filter: $("#custodian_filter").val() || "",
+    },
+    callback: function (res) {
+      frappe.dom.unfreeze();
 
-  function safe(v) {
-    if (!v || v === null || v === undefined || v === "") return "N/A";
-    return v;
-  }
-
-  function getComponentValue(obj, keys) {
-    if (!obj) return "N/A";
-    if (typeof obj === "string") {
-      try { obj = JSON.parse(obj); } catch (e) { obj = {}; }
+      if (res.message) {
+        window.location.href = res.message; // download file
+      } else {
+        frappe.msgprint("Failed to generate Excel.");
+      }
+    },
+    error: () => {
+      frappe.dom.unfreeze();
+      frappe.msgprint("Error while downloading Excel.");
     }
-    const lower = Object.fromEntries(Object.entries(obj).map(([k,v]) => [k.toLowerCase(), v]));
-    for (let k of keys) {
-      if (lower[k.toLowerCase()] !== undefined) return lower[k.toLowerCase()] || "N/A";
-    }
-    return "N/A";
-  }
+  });
+});
 
   // ----------------------------------------
   // Render Table
@@ -185,53 +214,80 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
       { label: "Processor", cls: "" },
       { label: "RAM", cls: "" },
       { label: "Hard Disk", cls: "" },
-      { label: "Mother Board", cls: "" }
+      { label: "Mother Board", cls: "" },
+      { label: "Keyboard", cls: "" },
+      { label: "Mouse", cls: "" },
+      { label: "Charger", cls: "" },
+      { label: "WIFI-MAC Address", cls: "" },
     ];
 
-    const thead = `<tr>${headers.map(h => `<th class="${h.cls}">${h.label}</th>`).join("")}</tr>`;
+    const thead = `<tr>${headers.map((h) => `<th class="${h.cls}">${h.label}</th>`).join("")}</tr>`;
     $table.find("thead").html(thead);
     $tbody.empty();
 
-    data.sort((a,b)=> (a.asset_id||"").localeCompare(b.asset_id||""));
+    data.sort((a, b) => (a.asset_id || "").localeCompare(b.asset_id || ""));
 
-    data.forEach(row => {
+    if (!data.length) {
+      $tbody.html(
+        `<tr><td colspan="${headers.length}" class="text-center">No records found</td></tr>`,
+      );
+      return;
+    }
+
+    data.forEach((row) => {
       let comp = {};
       if (row.asset_components) {
-        try { comp = JSON.parse(row.asset_components); } catch {}
+        try {
+          comp = JSON.parse(row.asset_components);
+        } catch {}
       }
 
       const tr = `
-        <tr>
-          <td class="col-id">
-            <a href="/app/asset/${row.id}" target="_blank">${row.id}</a>
-          </td>
-          <td class="col-assetid">${safe(row.asset_id)}</td>
-          <td>${safe(row.item_name)}</td>
-          <td class="col-custodian">${safe(row.used_by)}</td>
-          <td>${safe(row.asset_category)}</td>
-          <td>${safe(getComponentValue(comp, ["processor"]))}</td>
-          <td>${safe(getComponentValue(comp, ["ram"]))}</td>
-          <td>${safe(getComponentValue(comp, ["hard disk","hdd"]))}</td>
-          <td>${safe(getComponentValue(comp, ["mother board","motherboard"]))}</td>
-        </tr>
+      <tr>
+        <td class="col-id"><a href="/app/asset/${row.id}" target="_blank">${row.id}</a></td>
+        <td class="col-assetid">${safe(row.asset_id)}</td>
+        <td>${safe(row.item_name)}</td>
+        <td class="col-custodian">${safe(row.used_by)}</td>
+        <td>${safe(row.asset_category)}</td>
+
+        <td>${safe(getComponentValue(comp, ["processor"]))}</td>
+        <td>${safe(getComponentValue(comp, ["ram"]))}</td>
+        <td>${safe(getComponentValue(comp, ["harddisk", "hard disk", "hdd"]))}</td>
+        <td>${safe(getComponentValue(comp, ["motherboard", "mother board", "mb"]))}</td>
+
+        <td>${safe(getComponentValue(comp, ["keyboard"]))}</td>
+        <td>${safe(getComponentValue(comp, ["mouse"]))}</td>
+        <td>${safe(getComponentValue(comp, ["charger", "poweradapter"]))}</td>
+        <td>${safe(getComponentValue(comp, ["Wi-fi MAC Address","wifi mac address","wifi mac","mac address","wireless mac",]),)}</td>
+
+      </tr>
       `;
       $tbody.append(tr);
     });
 
-    // dynamic sticky width fix
     setTimeout(() => {
       const idCol = $("#record_table td.col-id:first").outerWidth() || 150;
-      const assetIdCol = $("#record_table td.col-assetid:first").outerWidth() || 150;
+      const assetIdCol =
+        $("#record_table td.col-assetid:first").outerWidth() || 150;
 
-      document.documentElement.style.setProperty("--col-id-width", idCol + "px");
-      document.documentElement.style.setProperty("--col-assetid-width", assetIdCol + "px");
+      document.documentElement.style.setProperty(
+        "--col-id-width",
+        idCol + "px",
+      );
+      document.documentElement.style.setProperty(
+        "--col-assetid-width",
+        assetIdCol + "px",
+      );
     }, 60);
   }
 
   // Reset table on filter change
-  $form.on("input change", "#filter_text, #category_filter, #component_filter, #custodian_filter", function () {
-    $tbody.empty();
-    $table.find("thead").empty();
-  });
-
+  $form.on(
+    "input change",
+    "#filter_text, #category_filter, #component_filter, #custodian_filter",
+    function () {
+      $tbody.empty();
+      $table.find("thead").empty();
+    },
+  );
 };
