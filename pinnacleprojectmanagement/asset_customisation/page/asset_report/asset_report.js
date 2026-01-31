@@ -271,7 +271,9 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
     const headers = [
       { label: "ID", cls: "col-id" },
       { label: "Asset ID", cls: "col-assetid" },
+      { label: "Asset Name", cls: "" },
       { label: "Item Name", cls: "" },
+      { label: "Location", cls: "" },
       { label: "Custodian", cls: "col-custodian" },
       { label: "Asset Category", cls: "" },
       { label: "Processor", cls: "" },
@@ -309,7 +311,9 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
         <tr>
           <td class="col-id"><a href="/app/asset/${row.id}" target="_blank">${row.id}</a></td>
           <td class="col-assetid">${safe(row.asset_id)}</td>
+          <td>${safe(row.asset_name)}</td>
           <td>${safe(row.item_name)}</td>
+          <td>${safe(row.location)}</td>
           <td class="col-custodian">${safe(row.used_by)}</td>
           <td>${safe(row.asset_category)}</td>
 

@@ -212,6 +212,8 @@ def get_assets(filter_text=None, asset_category=None, component_filter=None, cus
         SELECT  
             a.name AS id,
             a.custom_asset_id AS asset_id,
+            a.asset_name AS asset_name,
+            a.location AS location,
             a.custom_custodian_name AS used_by,
             a.item_name,
             a.asset_category,
@@ -230,7 +232,9 @@ def get_assets(filter_text=None, asset_category=None, component_filter=None, cus
 
         GROUP BY 
             a.name, 
-            a.custom_asset_id, 
+            a.custom_asset_id,
+            a.asset_name,
+            a.location, 
             a.custom_custodian_name, 
             a.item_name, 
             a.asset_category
@@ -252,9 +256,20 @@ def download_assets_excel(filter_text=None, asset_category=None, component_filte
     ws.title = "Asset Report"
 
     headers = [
-        "ID", "Asset ID", "Item Name", "Custodian", "Asset Category",
-        "Processor", "RAM", "Hard Disk", "Mother Board",
-        "Keyboard", "Mouse", "Charger", "WIFI-MAC Address"
+        "Asset ID",
+        "Asset Name",
+        "Item Name",
+        "Location",
+        "Custodian",
+        "Asset Category",
+        "Processor",
+        "RAM",
+        "Hard Disk",
+        "Mother Board",
+        "Keyboard",
+        "Mouse",
+        "Charger",
+        "WIFI-MAC Address"
     ]
     ws.append(headers)
 
@@ -279,9 +294,10 @@ def download_assets_excel(filter_text=None, asset_category=None, component_filte
             return ""
 
         ws.append([
-            row.get("id") or "N/A",
             row.get("asset_id") or "N/A",
+            row.get("asset_name") or "N/A",
             row.get("item_name") or "N/A",
+            row.get("location") or "N/A",
             row.get("used_by") or "N/A",
             row.get("asset_category") or "N/A",
             get_val(["processor"]) or "N/A",
@@ -293,6 +309,7 @@ def download_assets_excel(filter_text=None, asset_category=None, component_filte
             get_val(["charger"]) or "N/A",
             get_val(["wifi mac address","wi-fi mac address","mac address"]) or "N/A"
         ])
+
 
     file_name = "Asset_Report.xlsx"
     file_path = get_site_path("private", "files", file_name)
