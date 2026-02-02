@@ -220,11 +220,12 @@ def get_assets(filter_text=None, asset_category=None, component_filter=None, cus
 
             COALESCE(
                 JSON_OBJECTAGG(
-                    LOWER(REPLACE(REPLACE(ac.component_name,' ',''),'-','')),
+                    ac.component_name,
                     ac.specification
                 ),
                 '{{}}'
             ) AS asset_components
+
 
         FROM `tabAsset` a
         LEFT JOIN `{AC_TABLE}` ac ON ac.asset = a.name
@@ -255,6 +256,25 @@ def download_assets_excel(filter_text=None, asset_category=None, component_filte
     ws = wb.active
     ws.title = "Asset Report"
 
+    # -----------------------------------
+    # Collect all unique component names
+    # -----------------------------------
+    component_set = set()
+
+    for row in data:
+        if row.get("asset_components"):
+            try:
+                comp = json.loads(row["asset_components"])
+                for k in comp.keys():
+                    component_set.add(k)
+            except:
+                pass
+
+    component_headers = sorted(component_set)
+
+    # -----------------------------------
+    # Excel Headers (dynamic)
+    # -----------------------------------
     headers = [
         "Asset ID",
         "Asset Name",
@@ -262,17 +282,13 @@ def download_assets_excel(filter_text=None, asset_category=None, component_filte
         "Location",
         "Custodian",
         "Asset Category",
-        "Processor",
-        "RAM",
-        "Hard Disk",
-        "Mother Board",
-        "Keyboard",
-        "Mouse",
-        "Charger",
-        "WIFI-MAC Address"
-    ]
+    ] + component_headers
+
     ws.append(headers)
 
+    # -----------------------------------
+    # Data rows
+    # -----------------------------------
     for row in data:
         comp = {}
         if row.get("asset_components"):
@@ -281,36 +297,23 @@ def download_assets_excel(filter_text=None, asset_category=None, component_filte
             except:
                 comp = {}
 
-        def get_val(keys):
-            normalized = {}
-            for k, v in comp.items():
-                nk = k.lower().replace(" ", "").replace("-", "")
-                normalized[nk] = v
-
-            for key in keys:
-                nk = key.lower().replace(" ", "").replace("-", "")
-                if nk in normalized:
-                    return normalized[nk]
-            return ""
-
-        ws.append([
+        row_values = [
             row.get("asset_id") or "N/A",
             row.get("asset_name") or "N/A",
             row.get("item_name") or "N/A",
             row.get("location") or "N/A",
             row.get("used_by") or "N/A",
             row.get("asset_category") or "N/A",
-            get_val(["processor"]) or "N/A",
-            get_val(["ram"]) or "N/A",
-            get_val(["harddisk","hdd"]) or "N/A",
-            get_val(["motherboard","mother board"]) or "N/A",
-            get_val(["keyboard"]) or "N/A",
-            get_val(["mouse"]) or "N/A",
-            get_val(["charger"]) or "N/A",
-            get_val(["wifi mac address","wi-fi mac address","mac address"]) or "N/A"
-        ])
+        ]
 
+        for c in component_headers:
+            row_values.append(comp.get(c) or "N/A")
 
+        ws.append(row_values)
+
+    # -----------------------------------
+    # Save file
+    # -----------------------------------
     file_name = "Asset_Report.xlsx"
     file_path = get_site_path("private", "files", file_name)
 

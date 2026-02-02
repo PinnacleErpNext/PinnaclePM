@@ -34,6 +34,27 @@ def create_components_from_dialog(asset, components):
 
     return created_components
 
+@frappe.whitelist()
+def update_components_from_dialog(components):
+    components = json.loads(components)
+
+    for row in components:
+        if not row.get("name"):
+            continue
+
+        doc = frappe.get_doc("Asset Components", row["name"])
+        doc.serial_no = row.get("serial_no")
+        doc.component = row.get("component")
+        doc.specification = row.get("specification")
+        doc.brand_name = row.get("brand_name")
+        doc.vendor = row.get("vendor")
+        doc.date_of_addition = row.get("date_of_addition")
+        doc.warrent_start = row.get("warrent_start")
+        doc.warrent_end = row.get("warrent_end")
+        doc.save(ignore_permissions=True)
+
+    return "updated"
+
 
 def on_submit(doc, method):
     """Update Asset custodian after Asset Movement submission"""

@@ -13,9 +13,11 @@ frappe.ui.form.on("Asset", {
               fieldname: "components",
               fieldtype: "Table",
               label: "Components",
-              reqd: 1,
               in_editable_grid: 1,
+              reqd: 1,
               fields: [
+                { fieldname: "name", fieldtype: "Data", hidden: 1 },
+
                 {
                   label: "Serial No",
                   fieldname: "serial_no",
@@ -30,6 +32,12 @@ frappe.ui.form.on("Asset", {
                   in_list_view: 1,
                   reqd: 1,
                   get_query: () => ({ filters: { custom_is_component: 1 } }),
+                },
+                {
+                  label: "Specification",
+                  fieldname: "specification",
+                  fieldtype: "Data",
+                  in_list_view: 1,
                 },
                 {
                   label: "Brand Name",
@@ -61,173 +69,153 @@ frappe.ui.form.on("Asset", {
                   fieldtype: "Date",
                   in_list_view: 1,
                 },
-                {
-                  label: "Specification",
-                  fieldname: "specification",
-                  fieldtype: "Data",
-                  in_list_view: 1,
-                },
               ],
             },
           ],
 
           primary_action_label: "Update Components",
-          primary_action(values) {
+          primary_action: async function (values) {
             let new_list = values.components || [];
 
-            // --------------------------------------------------
-            // IDENTIFY REMOVED COMPONENTS
-            // --------------------------------------------------
-            let removed = original_components.filter(
-              (orig) =>
-                !new_list.some(
-                  (n) =>
-                    n.component === orig.component &&
-                    n.serial_no === orig.serial_no
-                )
-            );
+            // ---------------------------
+            // FIND REMOVED
+            // ---------------------------
+            let removed = original_components.filter((orig) => {
+              return !new_list.some((n) => n.name && n.name === orig.name);
+            });
 
-            // --------------------------------------------------
-            // IDENTIFY NEWLY ADDED COMPONENTS
-            // --------------------------------------------------
-            let added = new_list.filter(
-              (n) =>
-                !original_components.some(
-                  (orig) =>
-                    n.component === orig.component &&
-                    n.serial_no === orig.serial_no
-                )
-            );
+            // ---------------------------
+            // FIND ADDED
+            // ---------------------------
+            let added = new_list.filter((n) => {
+              return (
+                !n.name || !original_components.some((o) => o.name === n.name)
+              );
+            });
 
-            // --------------------------------------------------
-            // SUMMARY TABLE
-            // --------------------------------------------------
+            // ---------------------------
+            // FIND UPDATED
+            // ---------------------------
+            let updated = new_list.filter((n) => {
+              let orig = original_components.find((o) => o.name === n.name);
+              if (!orig) return false;
+
+              return (
+                n.specification !== orig.specification ||
+                n.brand_name !== orig.brand_name ||
+                n.vendor !== orig.vendor ||
+                n.date_of_addition !== orig.date_of_addition ||
+                n.warrent_start !== orig.warrent_start ||
+                n.warrent_end !== orig.warrent_end ||
+                n.serial_no !== orig.serial_no ||
+                n.component !== orig.component
+              );
+            });
+
             const generate_summary_table = (items) => {
               if (!items.length) return "";
-
               let rows = items
                 .map(
                   (i) =>
-                    `<tr>
-                                    <td>${i.component} (${i.serial_no}) — ${
-                      i.brand_name || "Unknown"
-                    }</td>
-                                </tr>`
+                    `<tr><td>${i.component} (${i.serial_no || ""})</td></tr>`,
                 )
                 .join("");
 
               return `
-                                <table class="table table-bordered" style="margin-top:10px;">
-                                    <thead>
-                                        <tr><th>Component Summary</th></tr>
-                                    </thead>
-                                    <tbody>${rows}</tbody>
-                                </table>`;
+                <table class="table table-bordered">
+                  <thead><tr><th>Components</th></tr></thead>
+                  <tbody>${rows}</tbody>
+                </table>`;
             };
 
-            // --------------------------------------------------
-            // PROCESS REMOVED + ADDED
-            // --------------------------------------------------
-            const process_changes = () => {
-              // If removed components exist
-              if (removed.length) {
-                frappe.confirm(
-                  `
-                                    <b>You removed ${
-                                      removed.length
-                                    } component(s):</b>
-                                    ${generate_summary_table(removed)}
-                                    <br>Do you want to <b>unlink</b> them from this Asset?
-                                    `,
-                  () => {
-                    // UNLINK from asset
-                    removed.forEach((r) => {
-                      frappe.call({
-                        method: "frappe.client.set_value",
-                        args: {
-                          doctype: "Asset Components",
-                          name: r.name,
-                          fieldname: "asset",
-                          value: null,
-                        },
-                      });
-                    });
+            // ---------------------------
+            // PROCESS UPDATES (SERVER SIDE)
+            // ---------------------------
+            const process_updates = async () => {
+              if (!updated.length) return;
 
-                    if (added.length) process_additions();
-                    else finalize_update();
-                  }
-                );
-              } else if (added.length) {
-                process_additions();
-              } else {
-                finalize_update();
-              }
+              await frappe.call({
+                method:
+                  "pinnacleprojectmanagement.asset_customisation.doctype.asset_components.asset_components.update_components_from_dialog",
+                args: {
+                  components: JSON.stringify(updated),
+                },
+              });
             };
 
-            // --------------------------------------------------
-            // ADD NEW COMPONENTS
-            // --------------------------------------------------
-            const process_additions = () => {
-              frappe.confirm(
-                `
-                                <b>You added ${
-                                  added.length
-                                } new component(s):</b>
-                                ${generate_summary_table(added)}
-                                <br>Do you want to create them?
-                                `,
-                () => {
-                  frappe.call({
-                    method:
-                      "pinnacleprojectmanagement.asset_customisation.doctype.asset_components.asset_components.create_components_from_dialog",
+            // ---------------------------
+            // PROCESS ADDITIONS
+            // ---------------------------
+            const process_additions = async () => {
+              if (!added.length) return [];
+
+              let clean_added = added.map((r) => {
+                let row = { ...r };
+                delete row.name; // important
+                return row;
+              });
+
+              let r = await frappe.call({
+                method:
+                  "pinnacleprojectmanagement.asset_customisation.doctype.asset_components.asset_components.create_components_from_dialog",
+                args: {
+                  asset: frm.doc.name,
+                  components: JSON.stringify(clean_added),
+                },
+              });
+
+              return r.message || [];
+            };
+
+            // ---------------------------
+            // PROCESS REMOVALS
+            // ---------------------------
+            const process_removals = async () => {
+              if (!removed.length) return;
+
+              await Promise.all(
+                removed.map((r) => {
+                  return frappe.call({
+                    method: "frappe.client.set_value",
                     args: {
-                      asset: frm.doc.name,
-                      components: JSON.stringify(added),
-                    },
-                    callback(r) {
-                      finalize_update(r.message || []);
+                      doctype: "Asset Components",
+                      name: r.name,
+                      fieldname: "asset",
+                      value: null,
                     },
                   });
-                }
+                }),
               );
             };
 
-            // --------------------------------------------------
-            // FINAL UI UPDATE
-            // --------------------------------------------------
-            const finalize_update = (created = []) => {
-              d.hide();
-              frm.reload_doc();
-
-              if (created.length) {
-                let clickable = created
-                  .map(
-                    (c) => `<a href="/app/asset-components/${c}" 
-                                                target="_blank" 
-                                                style="color:var(--primary);font-weight:600;">
-                                                ${c}</a>`
-                  )
-                  .join(", ");
-
-                frappe.msgprint(`
-                                    <div style="font-size:16px;">
-                                        ${clickable} created.
-                                    </div>
-                                `);
-              }
-
-              frappe.show_alert("Components Updated", 7);
-            };
-
-            process_changes();
+            // ---------------------------
+            // MAIN FLOW
+            // ---------------------------
+            if (removed.length) {
+              frappe.confirm(
+                `<b>You removed ${removed.length} component(s)</b>
+                 ${generate_summary_table(removed)}
+                 <br>Unlink them?`,
+                async () => {
+                  await process_removals();
+                  await process_updates();
+                  let created = await process_additions();
+                  finalize_update(created);
+                },
+              );
+            } else {
+              await process_updates();
+              let created = await process_additions();
+              finalize_update(created);
+            }
           },
         });
 
         d.show();
 
-        // --------------------------------------------------
+        // ---------------------------
         // LOAD EXISTING COMPONENTS
-        // --------------------------------------------------
+        // ---------------------------
         d.$wrapper.on("shown.bs.modal", () => {
           frappe.call({
             method: "frappe.client.get_list",
@@ -236,30 +224,49 @@ frappe.ui.form.on("Asset", {
               filters: { asset: frm.doc.name },
               fields: [
                 "name",
-                "component",
                 "serial_no",
+                "component",
+                "specification",
                 "brand_name",
                 "vendor",
                 "date_of_addition",
                 "warrent_start",
                 "warrent_end",
-                "specification",
               ],
             },
             callback(res) {
               let table_field = d.get_field("components");
-              table_field.df.data = [];
 
-              original_components = res.message || [];
-
-              original_components.forEach((row) => {
-                table_field.df.data.push(row);
-              });
+              // IMPORTANT: deep copy
+              original_components = JSON.parse(
+                JSON.stringify(res.message || []),
+              );
+              table_field.df.data = JSON.parse(
+                JSON.stringify(res.message || []),
+              );
 
               table_field.refresh();
             },
           });
         });
+
+        const finalize_update = (created = []) => {
+          d.hide();
+          frm.reload_doc();
+
+          if (created.length) {
+            let clickable = created
+              .map(
+                (c) =>
+                  `<a href="/app/asset-components/${c}" target="_blank">${c}</a>`,
+              )
+              .join(", ");
+
+            frappe.msgprint(`<b>Created:</b> ${clickable}`);
+          }
+
+          frappe.show_alert("Components Updated", 7);
+        };
       });
     }
   },

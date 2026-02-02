@@ -267,85 +267,88 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
   // ---------------------------
   // Render Table
   // ---------------------------
-  function render_table(data) {
-    const headers = [
-      { label: "ID", cls: "col-id" },
-      { label: "Asset ID", cls: "col-assetid" },
-      { label: "Asset Name", cls: "" },
-      { label: "Item Name", cls: "" },
-      { label: "Location", cls: "" },
-      { label: "Custodian", cls: "col-custodian" },
-      { label: "Asset Category", cls: "" },
-      { label: "Processor", cls: "" },
-      { label: "RAM", cls: "" },
-      { label: "Hard Disk", cls: "" },
-      { label: "Mother Board", cls: "" },
-      { label: "Keyboard", cls: "" },
-      { label: "Mouse", cls: "" },
-      { label: "Charger", cls: "" },
-      { label: "WIFI-MAC Address", cls: "" },
-    ];
+function render_table(data) {
 
-    const thead = `<tr>${headers.map((h) => `<th class="${h.cls}">${h.label}</th>`).join("")}</tr>`;
-    $table.find("thead").html(thead);
-    $tbody.empty();
+  if (!data.length) {
+    $tbody.html(`<tr><td colspan="20" class="text-center">No records found</td></tr>`);
+    return;
+  }
 
-    data.sort((a, b) => (a.asset_id || "").localeCompare(b.asset_id || ""));
+  // -------------------------
+  // Collect dynamic components
+  // -------------------------
+  let componentSet = new Set();
 
-    if (!data.length) {
-      $tbody.html(
-        `<tr><td colspan="${headers.length}" class="text-center">No records found</td></tr>`,
-      );
-      return;
+  data.forEach(row => {
+    if (row.asset_components) {
+      try {
+        const comp = JSON.parse(row.asset_components);
+        Object.keys(comp).forEach(k => componentSet.add(k));
+      } catch {}
+    }
+  });
+
+  const componentHeaders = Array.from(componentSet).sort();
+
+  // -------------------------
+  // Build headers
+  // -------------------------
+  const headers = [
+    { label: "Asset", cls: "col-id" },          // clickable doc link
+    { label: "Asset ID", cls: "col-assetid" },
+    { label: "Asset Name", cls: "" },
+    { label: "Item Name", cls: "" },
+    { label: "Location", cls: "" },
+    { label: "Custodian", cls: "col-custodian" },
+    { label: "Asset Category", cls: "" },
+    ...componentHeaders.map(c => ({ label: c, cls: "" }))
+  ];
+
+  const thead = `<tr>${headers.map(h => `<th class="${h.cls}">${h.label}</th>`).join("")}</tr>`;
+  $table.find("thead").html(thead);
+  $tbody.empty();
+
+  // -------------------------
+  // Render rows
+  // -------------------------
+  data.forEach(row => {
+    let comp = {};
+    if (row.asset_components) {
+      try { comp = JSON.parse(row.asset_components); } catch {}
     }
 
-    data.forEach((row) => {
-      let comp = {};
-      if (row.asset_components) {
-        try {
-          comp = JSON.parse(row.asset_components);
-        } catch {}
-      }
+    let componentTds = componentHeaders.map(c => {
+      return `<td>${safe(comp[c])}</td>`;
+    }).join("");
 
-      const tr = `
-        <tr>
-          <td class="col-id"><a href="/app/asset/${row.id}" target="_blank">${row.id}</a></td>
-          <td class="col-assetid">${safe(row.asset_id)}</td>
-          <td>${safe(row.asset_name)}</td>
-          <td>${safe(row.item_name)}</td>
-          <td>${safe(row.location)}</td>
-          <td class="col-custodian">${safe(row.used_by)}</td>
-          <td>${safe(row.asset_category)}</td>
+    const tr = `
+      <tr>
+        <td class="col-id">
+          <a href="/app/asset/${row.id}" target="_blank">${row.id}</a>
+        </td>
+        <td class="col-assetid">${safe(row.asset_id)}</td>
+        <td>${safe(row.asset_name)}</td>
+        <td>${safe(row.item_name)}</td>
+        <td>${safe(row.location)}</td>
+        <td class="col-custodian">${safe(row.used_by)}</td>
+        <td>${safe(row.asset_category)}</td>
+        ${componentTds}
+      </tr>
+    `;
 
-          <td>${safe(getComponentValue(comp, ["processor"]))}</td>
-          <td>${safe(getComponentValue(comp, ["ram"]))}</td>
-          <td>${safe(getComponentValue(comp, ["harddisk", "hard disk", "hdd"]))}</td>
-          <td>${safe(getComponentValue(comp, ["motherboard", "mother board", "mb"]))}</td>
+    $tbody.append(tr);
+  });
 
-          <td>${safe(getComponentValue(comp, ["keyboard"]))}</td>
-          <td>${safe(getComponentValue(comp, ["mouse"]))}</td>
-          <td>${safe(getComponentValue(comp, ["charger", "poweradapter"]))}</td>
-          <td>${safe(getComponentValue(comp, ["Wi-fi MAC Address", "wifi mac address", "wifi mac", "mac address", "wireless mac"]))}</td>
-        </tr>
-      `;
-      $tbody.append(tr);
-    });
+  // Sticky width fix
+  setTimeout(() => {
+    const idCol = $("#record_table td.col-id:first").outerWidth() || 160;
+    const assetIdCol = $("#record_table td.col-assetid:first").outerWidth() || 160;
 
-    setTimeout(() => {
-      const idCol = $("#record_table td.col-id:first").outerWidth() || 150;
-      const assetIdCol =
-        $("#record_table td.col-assetid:first").outerWidth() || 150;
+    document.documentElement.style.setProperty("--col-id-width", idCol + "px");
+    document.documentElement.style.setProperty("--col-assetid-width", assetIdCol + "px");
+  }, 60);
+}
 
-      document.documentElement.style.setProperty(
-        "--col-id-width",
-        idCol + "px",
-      );
-      document.documentElement.style.setProperty(
-        "--col-assetid-width",
-        assetIdCol + "px",
-      );
-    }, 60);
-  }
 
   // Reset table on filter change
   $form.on(
