@@ -1,0 +1,144 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "format:ABD-{financial_year}-{#}",
+ "creation": "2025-12-26 11:57:14.454487",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_lkqh",
+  "amended_from",
+  "company",
+  "financial_year",
+  "is_opening_entry",
+  "depreciation",
+  "total_opening_wdv",
+  "total_asset_added_h1",
+  "total_asset_added_h2",
+  "total_sales",
+  "total_total",
+  "total_net_total",
+  "total_depreciation",
+  "total_closing_wdv"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_lkqh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Asset Block Depreciation",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "financial_year",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Financial Year",
+   "options": "Fiscal Year"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_opening_entry",
+   "fieldtype": "Check",
+   "label": "Is Opening Entry"
+  },
+  {
+   "fieldname": "depreciation",
+   "fieldtype": "Table",
+   "label": "Depreciation",
+   "options": "Block Depreciation"
+  },
+  {
+   "fieldname": "total_opening_wdv",
+   "fieldtype": "Data",
+   "label": "Total Opening Wdv",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_asset_added_h1",
+   "fieldtype": "Data",
+   "label": "Total Asset Added H1",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_asset_added_h2",
+   "fieldtype": "Data",
+   "label": "Total Asset Added H2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_sales",
+   "fieldtype": "Data",
+   "label": "Total Sales",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_total",
+   "fieldtype": "Data",
+   "label": "Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_net_total",
+   "fieldtype": "Data",
+   "label": "Total Net Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_depreciation",
+   "fieldtype": "Data",
+   "label": "Total Depreciation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_closing_wdv",
+   "fieldtype": "Data",
+   "label": "Total Closing Wdv",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-01-15 17:42:07.992060",
+ "modified_by": "Administrator",
+ "module": "Asset Customisation",
+ "name": "Asset Block Depreciation",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

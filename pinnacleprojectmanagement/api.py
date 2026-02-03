@@ -1,5 +1,8 @@
 import frappe
 import json
+from openpyxl import Workbook
+from frappe.utils.file_manager import save_file
+from frappe.utils import get_site_path
 
 
 @frappe.whitelist(allow_guest=True)
@@ -164,3 +167,164 @@ def authenticate_user(email):
         frappe.logger().error(f"[Bot Auth API] Unexpected Error: {e}")
         frappe.log_error(frappe.get_traceback(), "User Authentication Error")
         return {"status": 500, "message": str(e), "exist": False}
+    
+@frappe.whitelist()
+def get_assets(filter_text=None, asset_category=None, component_filter=None, custodian_filter=None):
+
+    AC_TABLE = "tabAsset Components"
+
+    conditions = []
+    params = []
+
+    # ✅ Only submitted Assets
+    conditions.append("a.docstatus = 1")
+
+    if filter_text:
+        like = f"%{filter_text}%"
+        conditions.append("""
+            (a.custom_asset_id LIKE %s
+            OR a.custom_custodian_name LIKE %s
+            OR a.item_name LIKE %s)
+        """)
+        params.extend([like, like, like])
+
+    if asset_category:
+        conditions.append("a.asset_category = %s")
+        params.append(asset_category)
+
+    if custodian_filter:
+        conditions.append("a.custom_custodian_name = %s")
+        params.append(custodian_filter)
+
+    if component_filter:
+        conditions.append("""
+            EXISTS (
+                SELECT 1 FROM `tabAsset Components` ac2
+                WHERE ac2.asset = a.name
+                AND ac2.component_name = %s
+            )
+        """)
+        params.append(component_filter)
+
+    where_clause = "WHERE " + " AND ".join(conditions)
+
+    query = f"""
+        SELECT  
+            a.name AS id,
+            a.custom_asset_id AS asset_id,
+            a.asset_name AS asset_name,
+            a.location AS location,
+            a.custom_custodian_name AS used_by,
+            a.item_name,
+            a.asset_category,
+
+            COALESCE(
+                JSON_OBJECTAGG(
+                    ac.component_name,
+                    ac.specification
+                ),
+                '{{}}'
+            ) AS asset_components
+
+
+        FROM `tabAsset` a
+        LEFT JOIN `{AC_TABLE}` ac ON ac.asset = a.name
+        {where_clause}
+
+        GROUP BY 
+            a.name, 
+            a.custom_asset_id,
+            a.asset_name,
+            a.location, 
+            a.custom_custodian_name, 
+            a.item_name, 
+            a.asset_category
+
+        ORDER BY a.custom_asset_id
+    """
+
+    return frappe.db.sql(query, params, as_dict=True)
+
+
+
+@frappe.whitelist()
+def download_assets_excel(filter_text=None, asset_category=None, component_filter=None, custodian_filter=None):
+
+    data = get_assets(filter_text, asset_category, component_filter, custodian_filter)
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Asset Report"
+
+    # -----------------------------------
+    # Collect all unique component names
+    # -----------------------------------
+    component_set = set()
+
+    for row in data:
+        if row.get("asset_components"):
+            try:
+                comp = json.loads(row["asset_components"])
+                for k in comp.keys():
+                    component_set.add(k)
+            except:
+                pass
+
+    component_headers = sorted(component_set)
+
+    # -----------------------------------
+    # Excel Headers (dynamic)
+    # -----------------------------------
+    headers = [
+        "Asset ID",
+        "Asset Name",
+        "Item Name",
+        "Location",
+        "Custodian",
+        "Asset Category",
+    ] + component_headers
+
+    ws.append(headers)
+
+    # -----------------------------------
+    # Data rows
+    # -----------------------------------
+    for row in data:
+        comp = {}
+        if row.get("asset_components"):
+            try:
+                comp = json.loads(row["asset_components"])
+            except:
+                comp = {}
+
+        row_values = [
+            row.get("asset_id") or "N/A",
+            row.get("asset_name") or "N/A",
+            row.get("item_name") or "N/A",
+            row.get("location") or "N/A",
+            row.get("used_by") or "N/A",
+            row.get("asset_category") or "N/A",
+        ]
+
+        for c in component_headers:
+            row_values.append(comp.get(c) or "N/A")
+
+        ws.append(row_values)
+
+    # -----------------------------------
+    # Save file
+    # -----------------------------------
+    file_name = "Asset_Report.xlsx"
+    file_path = get_site_path("private", "files", file_name)
+
+    wb.save(file_path)
+
+    file_doc = save_file(
+        file_name,
+        open(file_path, "rb").read(),
+        None,
+        None,
+        is_private=1
+    )
+
+    return file_doc.file_url
