@@ -2,6 +2,11 @@ import frappe
 from frappe import _
 from frappe.utils import get_url_to_form, getdate, today
 
+def validate(self):
+    if self.custom_overdue == 1 and not self.custom_overdue_reason:
+        frappe.throw("Overdue Reason is mandatory when task is marked Overdue")
+
+
 def on_update(doc, method):
     # Extract unique identifiers (e.g., email addresses) from current followers
     current_followers = {follower.user for follower in (doc.custom_followers or []) if follower.user}
@@ -74,7 +79,7 @@ def custom_set_tasks_as_overdue():
     tasks = frappe.get_all(
         "Task",
         filters={"status": ["not in", ["Cancelled", "Completed", "Close"]]},
-        fields=["name", "status", "review_date"],
+        fields=["name", "status", "review_date", "custom_assigned_to", "custom_allotted_to", "custom_overdue_reason"],
     )
 
     for task in tasks:
@@ -83,7 +88,68 @@ def custom_set_tasks_as_overdue():
             if task.review_date and getdate(task.review_date) > getdate(today()):
                 continue
 
-        frappe.get_doc("Task", task.name).update_status()
+        task_doc = frappe.get_doc("Task", task.name)
+        old_status = task_doc.status
+
+        # Let ERPNext decide if it becomes overdue
+        task_doc.update_status()
+        new_status = task_doc.status
+
+        # ✅ If task JUST became overdue
+        if old_status != "Overdue" and new_status == "Overdue":
+
+            # mark custom flag
+            frappe.db.set_value("Task", task_doc.name, "custom_overdue", 1)
+
+            # 🔔 Send reminder mail if reason is not filled
+            if not task_doc.custom_overdue_reason:
+                send_overdue_reason_mail(task_doc)
+
+
+def send_overdue_reason_mail(task_doc):
+    recipients = []
+
+    if task_doc.custom_assigned_to:
+        recipients.append(task_doc.custom_assigned_to)
+
+    if task_doc.custom_allotted_to:
+        recipients.append(task_doc.custom_allotted_to)
+
+    # remove duplicates
+    recipients = list(set(recipients))
+
+    if not recipients:
+        return
+
+    task_link = get_url_to_form("Task", task_doc.name)
+
+    subject = f"Reminder: Please fill Overdue Reason for Task {task_doc.name}"
+
+    message = f"""
+        <p>Dear User,</p>
+
+        <p>The following task has been marked as <b>Overdue</b>:</p>
+
+        <p>
+            <b>Task:</b> {task_doc.subject}<br>
+            <b>Task ID:</b> {task_doc.name}
+        </p>
+
+        <p>Please update the <b>Overdue Reason</b> in the task document.</p>
+
+        <p>
+            👉 <a href="{task_link}">Click here to open the Task</a>
+        </p>
+
+        <br>
+        <p>Thanks,<br>ERP System</p>
+    """
+
+    frappe.sendmail(
+        recipients=recipients,
+        subject=subject,
+        message=message
+    )
 
 
 def disable_core_task_overdue_job():
