@@ -7,7 +7,7 @@ app_license = "mit"
 
 
 before_migrate = "pinnacleprojectmanagement.utils.after_migrate"
-after_migrate = "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.disable_core_task_overdue_job"
+after_migrate = "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.task.disable_core_task_overdue_job"
 
 # Apps
 # ------------------
@@ -51,7 +51,7 @@ app_include_js = [
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Task": "public/js/task_customization.js",
+doctype_js = {"Task": "pinnacle_project_management/doctype/task/task.js",
               "Asset":"asset_customisation/doctype/assets/assets.js"}
 doctype_list_js = {
     "Task": "public/js/task_customization.js",
@@ -161,6 +161,8 @@ doc_events = {
         # "on_update": "pinnacleprojectmanagement.pinnacle_project_management.custom_notifications.task_followers",
         # "on_update": "pinnacleprojectmanagement.pinnacle_project_management.allottment.task_allottment",
         # "after_insert": "pinnacleprojectmanagement.pinnacle_project_management.allottment.task_allottment",
+        "validate": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.task.validate",
+        "before_save": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.task.before_save"
     },
     "Project": {
         "after_insert": "pinnacleprojectmanagement.pinnacle_project_management.allottment.project_allottment",
@@ -181,7 +183,7 @@ scheduler_events = {
     # 	"pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.process_task_reminders"
     # ],
     "daily": [
-        "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.custom_set_tasks_as_overdue"
+        "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.task.custom_set_tasks_as_overdue"
 
     ],
     # "hourly": [
