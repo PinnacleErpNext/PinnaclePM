@@ -102,7 +102,7 @@ def allot_task(task_data=None):
         # Create Task Assignment record
         doc = frappe.get_doc(
             {
-                "doctype": "Task Assignment",
+                "doctype": "Work Assignment",
                 "subject": task_data["subject"],
                 "assigned_to": task_data["assigned_to"],
                 "due_date": task_data["due_date"],
