@@ -74,7 +74,7 @@ def get_data(filters):
     tasks = frappe.get_all(
         "Task",
         filters={
-            "status": "Overdue",
+            "custom_overdue": 1,
             **({"project": filters["project"]} if filters.get("project") else {}),
             **(
                 {"custom_assigned_to": filters["assigned_to"]}
