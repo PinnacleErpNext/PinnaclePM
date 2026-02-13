@@ -144,7 +144,7 @@ function applyRolePermissions(frm) {
   let editable_fields = [];
 
   if (frappe.user.has_role("Projects User")) {
-    editable_fields = ["status", "custom_overdue_reason"];
+    editable_fields = ["status", "custom_overdue_reason", "progress"];
   } else if (
     frappe.user.has_role("Backlog Manager") &&
     frm.doc.custom_allotted_to === frappe.session.user
@@ -182,6 +182,7 @@ function applyRolePermissions(frm) {
       "closing_date",
       "actual_time",
       "custom_overdue_reason",
+      "progress",
     ];
   }
 
