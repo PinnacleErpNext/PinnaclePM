@@ -96,6 +96,11 @@ frappe.query_reports["Task List"] = {
       label: __("End Date"),
       fieldtype: "Date",
     },
+    {
+      fieldname: "is_overdue",
+      label: __("Is Overdue"),
+      fieldtype: "Check",
+    },
   ],
   onload: function (report) {
     applyBreadcrumbs();
