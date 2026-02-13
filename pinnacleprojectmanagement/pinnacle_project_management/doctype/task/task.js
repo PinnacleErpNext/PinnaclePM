@@ -178,6 +178,8 @@ function applyRolePermissions(frm) {
       "description",
       "custom_followers",
       "is_group",
+      "completed_on",
+      "completed_by",
       "review_date",
       "closing_date",
       "actual_time",
