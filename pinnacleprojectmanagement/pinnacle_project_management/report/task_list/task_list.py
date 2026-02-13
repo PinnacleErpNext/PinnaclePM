@@ -127,6 +127,10 @@ def get_data(filters):
     if filters and filters.get("task"):
         conditions.append("t.name = %(task)s")
         values["task"] = filters["task"]
+    
+    if filters and filters.get("is_overdue") is not None:
+        conditions.append("t.custom_overdue = %(is_overdue)s")
+        values["is_overdue"] = filters["is_overdue"]
 
     # Filter by Assigned & Allotted
     if filters and filters.get("assigned"):

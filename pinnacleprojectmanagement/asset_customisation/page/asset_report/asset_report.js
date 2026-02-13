@@ -22,6 +22,11 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
         </select>
       </div>
 
+      <div class="col-md-2 form-group" id="component_value_wrapper" style="display:none;">
+        <label>Component Value</label>
+        <input id="component_value_filter" class="form-control" placeholder="e.g. 8 GB">
+      </div>
+
       <div class="col-md-3 form-group">
         <label>Custodian</label>
         <select id="custodian_filter" class="form-control">
@@ -133,6 +138,17 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
       });
     },
   });
+  // Show/Hide Component Value based on Component selection
+  $form.on("change", "#component_filter", function () {
+    const selected = $(this).val();
+
+    if (selected) {
+      $("#component_value_wrapper").show();
+    } else {
+      $("#component_value_wrapper").hide();
+      $("#component_value_filter").val(""); // clear value when hidden
+    }
+  });
 
   // Components
   frappe.call({
@@ -222,6 +238,7 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
         filter_text: $("#filter_text").val() || "",
         asset_category: $("#category_filter").val() || "",
         component_filter: $("#component_filter").val() || "",
+        component_value: $("#component_value_filter").val() || "",
         custodian_filter: $("#custodian_filter").val() || "",
       },
       callback: function (res) {
@@ -247,6 +264,7 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
         filter_text: $("#filter_text").val() || "",
         asset_category: $("#category_filter").val() || "",
         component_filter: $("#component_filter").val() || "",
+        component_value: $("#component_value_filter").val() || "",
         custodian_filter: $("#custodian_filter").val() || "",
       },
       callback: function (res) {
@@ -267,61 +285,66 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
   // ---------------------------
   // Render Table
   // ---------------------------
-function render_table(data) {
-
-  if (!data.length) {
-    $tbody.html(`<tr><td colspan="20" class="text-center">No records found</td></tr>`);
-    return;
-  }
-
-  // -------------------------
-  // Collect dynamic components
-  // -------------------------
-  let componentSet = new Set();
-
-  data.forEach(row => {
-    if (row.asset_components) {
-      try {
-        const comp = JSON.parse(row.asset_components);
-        Object.keys(comp).forEach(k => componentSet.add(k));
-      } catch {}
-    }
-  });
-
-  const componentHeaders = Array.from(componentSet).sort();
-
-  // -------------------------
-  // Build headers
-  // -------------------------
-  const headers = [
-    { label: "Asset", cls: "col-id" },          // clickable doc link
-    { label: "Asset ID", cls: "col-assetid" },
-    { label: "Asset Name", cls: "" },
-    { label: "Item Name", cls: "" },
-    { label: "Location", cls: "" },
-    { label: "Custodian", cls: "col-custodian" },
-    { label: "Asset Category", cls: "" },
-    ...componentHeaders.map(c => ({ label: c, cls: "" }))
-  ];
-
-  const thead = `<tr>${headers.map(h => `<th class="${h.cls}">${h.label}</th>`).join("")}</tr>`;
-  $table.find("thead").html(thead);
-  $tbody.empty();
-
-  // -------------------------
-  // Render rows
-  // -------------------------
-  data.forEach(row => {
-    let comp = {};
-    if (row.asset_components) {
-      try { comp = JSON.parse(row.asset_components); } catch {}
+  function render_table(data) {
+    if (!data.length) {
+      $tbody.html(
+        `<tr><td colspan="20" class="text-center">No records found</td></tr>`,
+      );
+      return;
     }
 
-    let componentTds = componentHeaders.map(c => {
-      return `<td>${safe(comp[c])}</td>`;
-    }).join("");
+    // -------------------------
+    // Collect dynamic components
+    // -------------------------
+    let componentSet = new Set();
 
-    const tr = `
+    data.forEach((row) => {
+      if (row.asset_components) {
+        try {
+          const comp = JSON.parse(row.asset_components);
+          Object.keys(comp).forEach((k) => componentSet.add(k));
+        } catch {}
+      }
+    });
+
+    const componentHeaders = Array.from(componentSet).sort();
+
+    // -------------------------
+    // Build headers
+    // -------------------------
+    const headers = [
+      { label: "Asset", cls: "col-id" }, // clickable doc link
+      { label: "Asset ID", cls: "col-assetid" },
+      { label: "Asset Name", cls: "" },
+      { label: "Item Name", cls: "" },
+      { label: "Location", cls: "" },
+      { label: "Custodian", cls: "col-custodian" },
+      { label: "Asset Category", cls: "" },
+      ...componentHeaders.map((c) => ({ label: c, cls: "" })),
+    ];
+
+    const thead = `<tr>${headers.map((h) => `<th class="${h.cls}">${h.label}</th>`).join("")}</tr>`;
+    $table.find("thead").html(thead);
+    $tbody.empty();
+
+    // -------------------------
+    // Render rows
+    // -------------------------
+    data.forEach((row) => {
+      let comp = {};
+      if (row.asset_components) {
+        try {
+          comp = JSON.parse(row.asset_components);
+        } catch {}
+      }
+
+      let componentTds = componentHeaders
+        .map((c) => {
+          return `<td>${safe(comp[c])}</td>`;
+        })
+        .join("");
+
+      const tr = `
       <tr>
         <td class="col-id">
           <a href="/app/asset/${row.id}" target="_blank">${row.id}</a>
@@ -336,19 +359,25 @@ function render_table(data) {
       </tr>
     `;
 
-    $tbody.append(tr);
-  });
+      $tbody.append(tr);
+    });
 
-  // Sticky width fix
-  setTimeout(() => {
-    const idCol = $("#record_table td.col-id:first").outerWidth() || 160;
-    const assetIdCol = $("#record_table td.col-assetid:first").outerWidth() || 160;
+    // Sticky width fix
+    setTimeout(() => {
+      const idCol = $("#record_table td.col-id:first").outerWidth() || 160;
+      const assetIdCol =
+        $("#record_table td.col-assetid:first").outerWidth() || 160;
 
-    document.documentElement.style.setProperty("--col-id-width", idCol + "px");
-    document.documentElement.style.setProperty("--col-assetid-width", assetIdCol + "px");
-  }, 60);
-}
-
+      document.documentElement.style.setProperty(
+        "--col-id-width",
+        idCol + "px",
+      );
+      document.documentElement.style.setProperty(
+        "--col-assetid-width",
+        assetIdCol + "px",
+      );
+    }, 60);
+  }
 
   // Reset table on filter change
   $form.on(

@@ -1,0 +1,205 @@
+{
+ "actions": [],
+ "allow_events_in_timeline": 1,
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "format:WORK-ASS-{#}",
+ "creation": "2025-09-30 13:52:43.232476",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "task_assignment_section",
+  "subject",
+  "status",
+  "assigned_to",
+  "assigned_by",
+  "due_date",
+  "task_detail",
+  "reminder_section",
+  "remind_date",
+  "remind_time",
+  "reminder_interval",
+  "remind_till",
+  "no_of_occurence",
+  "last_reminded_at",
+  "reminder_count",
+  "pause_reminder",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Subject",
+   "reqd": 1
+  },
+  {
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Assigned To",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "task_detail",
+   "fieldtype": "Text Editor",
+   "label": "Task Detail"
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reminder_interval",
+   "fieldtype": "Table",
+   "label": "Reminder Interval",
+   "options": "Task Assignment Reminder",
+   "reqd": 1
+  },
+  {
+   "fieldname": "remind_till",
+   "fieldtype": "Datetime",
+   "label": "Remind Till"
+  },
+  {
+   "fieldname": "no_of_occurence",
+   "fieldtype": "Int",
+   "label": "No Of Occurence"
+  },
+  {
+   "fieldname": "reminder_section",
+   "fieldtype": "Section Break",
+   "label": "Reminder"
+  },
+  {
+   "fieldname": "task_assignment_section",
+   "fieldtype": "Section Break",
+   "label": "Work Assignment"
+  },
+  {
+   "fieldname": "last_reminded_at",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Last Reminded At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reminder_count",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Reminder Count",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "pause_reminder",
+   "fieldtype": "Check",
+   "label": "Pause Reminder"
+  },
+  {
+   "fieldname": "remind_date",
+   "fieldtype": "Date",
+   "label": "Remind Date"
+  },
+  {
+   "fieldname": "remind_time",
+   "fieldtype": "Time",
+   "label": "Remind Time"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Pending\nCompleted\nOverdue"
+  },
+  {
+   "fieldname": "assigned_by",
+   "fieldtype": "Link",
+   "label": "Assigned By",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Work Assignment",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-10 18:15:13.979280",
+ "modified_by": "Administrator",
+ "module": "Pinnacle Project Management",
+ "name": "Work Assignment",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Gray",
+   "title": "Pending"
+  },
+  {
+   "color": "Green",
+   "title": "Completed"
+  },
+  {
+   "color": "Red",
+   "title": "Overdue"
+  }
+ ],
+ "title_field": "subject"
+}

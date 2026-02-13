@@ -1,8 +1,13 @@
 import frappe
-from frappe import _
-from frappe.utils import get_url_to_form, getdate, today
+from datetime import timedelta
+from frappe.utils import getdate, today, get_url_to_form
 
-def validate(self):
+
+def before_save(self, method):
+    if self.exp_end_date:
+        self.review_date = getdate(self.exp_end_date) + timedelta(days=1)
+
+def validate(self, method):
     if self.custom_overdue == 1 and not self.custom_overdue_reason:
         frappe.throw("Overdue Reason is mandatory when task is marked Overdue")
 

@@ -102,7 +102,7 @@ def allot_task(task_data=None):
         # Create Task Assignment record
         doc = frappe.get_doc(
             {
-                "doctype": "Task Assignment",
+                "doctype": "Work Assignment",
                 "subject": task_data["subject"],
                 "assigned_to": task_data["assigned_to"],
                 "due_date": task_data["due_date"],
@@ -169,7 +169,7 @@ def authenticate_user(email):
         return {"status": 500, "message": str(e), "exist": False}
     
 @frappe.whitelist()
-def get_assets(filter_text=None, asset_category=None, component_filter=None, custodian_filter=None):
+def get_assets(filter_text=None, asset_category=None, component_filter=None, component_value=None, custodian_filter=None):
 
     AC_TABLE = "tabAsset Components"
 
@@ -196,10 +196,23 @@ def get_assets(filter_text=None, asset_category=None, component_filter=None, cus
         conditions.append("a.custom_custodian_name = %s")
         params.append(custodian_filter)
 
-    if component_filter:
+    if component_filter and component_value:
         conditions.append("""
             EXISTS (
-                SELECT 1 FROM `tabAsset Components` ac2
+                SELECT 1
+                FROM `tabAsset Components` ac2
+                WHERE ac2.asset = a.name
+                AND ac2.component_name = %s
+                AND ac2.specification LIKE %s
+            )
+        """)
+        params.extend([component_filter, f"%{component_value}%"])
+
+    elif component_filter:
+        conditions.append("""
+            EXISTS (
+                SELECT 1
+                FROM `tabAsset Components` ac2
                 WHERE ac2.asset = a.name
                 AND ac2.component_name = %s
             )
