@@ -98,6 +98,7 @@ def get_data(filters):
             "completed_on",
             "closing_date",
             "custom_overdue_reason",
+            "custom_overdue",
         ],
     )
 
@@ -106,7 +107,7 @@ def get_data(filters):
 
     for t in tasks:
         status, duration = calculate_status_and_duration(
-            t.exp_end_date, t.completed_on, t.closing_date, today_date
+            t.exp_end_date, t.completed_on, t.closing_date, t.custom_overdue, today_date
         )
 
         result.append(
@@ -126,16 +127,18 @@ def get_data(filters):
     return result
 
 
-def calculate_status_and_duration(end_date, completed_on, closing_date, today_date):
+def calculate_status_and_duration(end_date, completed_on, closing_date, overdue, today_date):
     if not end_date:
         return "On Time", "0"
 
     end_date = getdate(end_date)
     diff = date_diff(end_date, closing_date or completed_on or today_date)
-
+    
+    if overdue:
+        return "Overdue", f"{abs(diff)}d"
+    
     if diff == 0:
         return "On Time", "0"
     elif diff > 0:
         return "Before", f"{diff}d"
-    else:
-        return "Overdue", f"{abs(diff)}d"
+
