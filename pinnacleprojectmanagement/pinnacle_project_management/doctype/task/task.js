@@ -7,10 +7,12 @@ frappe.ui.form.on("Task", {
 
   refresh(frm) {
     setTaskStatusOptions(frm);
+    applyRolePermissions(frm);
   },
 
   project(frm) {
     setTaskStatusOptions(frm);
+    applyRolePermissions(frm);
     setModuleFilter(frm);
   },
   custom_allotted_to(frm) {
@@ -18,6 +20,24 @@ frappe.ui.form.on("Task", {
   },
   exp_end_date(frm) {
     frm.set_value("status", "Working");
+  },
+  custom__firebird_db_backup: function (frm) {
+    updateCheckListCount(frm);
+  },
+  custom__iis_feature_installation: function (frm) {
+    updateCheckListCount(frm);
+  },
+  custom__mygstcafe_setup_installation: function (frm) {
+    updateCheckListCount(frm);
+  },
+  custom_pg_admin_setup_installation: function (frm) {
+    updateCheckListCount(frm);
+  },
+  custom__software_update: function (frm) {
+    updateCheckListCount(frm);
+  },
+  custom__data_base_restore: function (frm) {
+    updateCheckListCount(frm);
   },
 });
 
@@ -62,7 +82,7 @@ function setTaskStatusOptions(frm) {
   const is_project_manager = frappe.user.has_role("Projects Manager") || false;
   const is_project_user = frappe.user.has_role("Projects User") || false;
   const is_backlog_manager = frappe.user.has_role("Backlog Manager") || false;
-  
+
   // ------------------------------------------------
   // 1️⃣ Project Specific Logic (Highest Priority)
   // ------------------------------------------------
@@ -112,7 +132,7 @@ function setTaskStatusOptions(frm) {
   else if (is_backlog_manager) {
     status_options = ["Open", "Close"];
   }
- 
+
   if (!status_options.includes(frm.doc.status)) {
     status_options.push(frm.doc.status);
   }
@@ -130,6 +150,7 @@ function setTaskStatusOptions(frm) {
 }
 
 function applyRolePermissions(frm) {
+  console.log("Applying role-based permissions for Task form");
   const is_admin = frappe.session.user === "Administrator";
 
   if (is_admin) return;
@@ -162,8 +183,16 @@ function applyRolePermissions(frm) {
       "expected_time",
       "custom_overdue_reason",
     ];
-    if ((frappe.session.user === frm.doc.custom_allotted_to && frm.doc.project === "Postgres Migration")) {
+    if (frm.doc.project === "Postgres Migration") {
       editable_fields.push(
+        "custom_allotted_to",
+        "custom_phone1",
+        "custom_phone2",
+        "custom_email1",
+        "custom_email2",
+        "custom_drive_location",
+        "custom_licence_key",
+        "custom_allotted_to",
         "custom__firebird_db_backup",
         "custom__iis_feature_installation",
         "custom__mygstcafe_setup_installation",
@@ -236,4 +265,25 @@ function setModuleFilter(frm) {
       },
     };
   });
+}
+
+function updateCheckListCount(frm) {
+  let total = 0;
+  const fields = [
+    "custom__firebird_db_backup",
+    "custom__iis_feature_installation",
+    "custom__mygstcafe_setup_installation",
+    "custom_pg_admin_setup_installation",
+    "custom__pg_setup_app_installation",
+    "custom__software_update",
+    "custom__data_base_restore",
+  ];
+
+  fields.forEach((field) => {
+    if (frm.doc[field]) {
+      total++;
+    }
+  });
+
+  frm.set_value("custom_check_list_count", total);
 }
