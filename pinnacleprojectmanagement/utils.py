@@ -67,7 +67,6 @@ def after_migrate():
             "parent_doctype": "Task",
             "fieldname": "status",
             "new_options": [
-                "Backlog",
                 "Open",
                 "Working",
                 "Renewal Pending",
