@@ -136,6 +136,12 @@ function applyRolePermissions(frm) {
 
   let editable_fields = [];
 
+  if (frm.doc.project === "Postgres Migration") {
+    frm.set_df_property("exp_start_date", "reqd", 0);
+    frm.set_df_property("exp_end_date", "reqd", 0);
+    frm.set_df_property("review_date", "reqd", 0);
+  }
+
   if (frappe.user.has_role("Projects User")) {
     editable_fields = ["status", "custom_overdue_reason", "progress"];
   } else if (frappe.user.has_role("Backlog Manager")) {
@@ -151,10 +157,12 @@ function applyRolePermissions(frm) {
       "custom_tag",
       "description",
       "custom_followers",
+      "completed_on",
+      "completed_by",
       "expected_time",
       "custom_overdue_reason",
     ];
-    if (frappe.session.user !== frm.doc.custom_allotted_to) {
+    if ((frappe.session.user === frm.doc.custom_allotted_to && frm.doc.project === "Postgres Migration")) {
       editable_fields.push(
         "custom__firebird_db_backup",
         "custom__iis_feature_installation",
