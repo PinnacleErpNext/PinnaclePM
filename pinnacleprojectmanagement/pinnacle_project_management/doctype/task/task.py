@@ -1,26 +1,48 @@
 import frappe
 from datetime import timedelta
-from frappe.utils import getdate, today, get_url_to_form
+from frappe.utils import cint, getdate, today, get_url_to_form
 
 
 def before_save(self, method):
     if self.exp_end_date:
-        self.review_date = getdate(self.exp_end_date) + timedelta(days=1)
+        if not self.review_date:
+            self.review_date = getdate(self.exp_end_date) + timedelta(days=1)
+
 
 def validate(self, method):
     if self.custom_overdue == 1 and not self.custom_overdue_reason:
         frappe.throw("Overdue Reason is mandatory when task is marked Overdue")
+    count = cint(self.custom_check_list_count)
+
+    if (
+        self.status == "Completed"
+        and self.project == "Postgres Migration"
+        and count < 7
+    ):
+        frappe.throw(
+            "Please complete all checklist items before marking the task as Completed."
+        )
 
 
 def on_update(doc, method):
     # Extract unique identifiers (e.g., email addresses) from current followers
-    current_followers = {follower.user for follower in (doc.custom_followers or []) if follower.user}
+    current_followers = {
+        follower.user for follower in (doc.custom_followers or []) if follower.user
+    }
 
     # Get the previous state of the document
     previous_doc = doc.get_doc_before_save()
 
     # Extract unique identifiers from previous followers
-    previous_followers = {follower.user for follower in (previous_doc.custom_followers or []) if follower.user} if previous_doc else set()
+    previous_followers = (
+        {
+            follower.user
+            for follower in (previous_doc.custom_followers or [])
+            if follower.user
+        }
+        if previous_doc
+        else set()
+    )
 
     # Get assignees and owner
     assignees = frappe.get_all(
@@ -28,29 +50,38 @@ def on_update(doc, method):
         filters={
             "reference_type": "Task",
             "reference_name": doc.name,
-            "status": "Open"  # Optional: Only fetch open assignments
+            "status": "Open",  # Optional: Only fetch open assignments
         },
-        fields=["allocated_to"]
+        fields=["allocated_to"],
     )
-    
+
     assignee_emails = [
         frappe.get_value("User", assignee["allocated_to"], "email")
-        for assignee in assignees if assignee.get("allocated_to")
+        for assignee in assignees
+        if assignee.get("allocated_to")
     ]
 
     owner_email = frappe.get_value("User", doc.owner, "email") if doc.owner else None
 
     # Determine new followers (added)
     new_followers = current_followers - previous_followers
-    new_followers_names = ', '.join(
-        frappe.db.get_value('User', follower, 'full_name') or "Unknown"
+    new_followers_names = ", ".join(
+        frappe.db.get_value("User", follower, "full_name") or "Unknown"
         for follower in new_followers
     )
 
-    modified_by_name = frappe.db.get_value('User', doc.modified_by, 'full_name') or "Unknown"
+    modified_by_name = (
+        frappe.db.get_value("User", doc.modified_by, "full_name") or "Unknown"
+    )
 
     # Recipients: Followers + Assignees + Owner (unique set to avoid duplicates)
-    recipients = list(set(current_followers | set(assignee_emails) | ({owner_email} if owner_email else set())))
+    recipients = list(
+        set(
+            current_followers
+            | set(assignee_emails)
+            | ({owner_email} if owner_email else set())
+        )
+    )
 
     if new_followers and recipients:
         subject = f"New Follower Added - {doc.name}"
@@ -64,8 +95,8 @@ def on_update(doc, method):
 
     # Determine removed followers
     removed_followers = previous_followers - current_followers
-    removed_followers_names = ', '.join(
-        frappe.db.get_value('User', follower, 'full_name') or "Unknown"
+    removed_followers_names = ", ".join(
+        frappe.db.get_value("User", follower, "full_name") or "Unknown"
         for follower in removed_followers
     )
 
@@ -84,7 +115,14 @@ def custom_set_tasks_as_overdue():
     tasks = frappe.get_all(
         "Task",
         filters={"status": ["not in", ["Cancelled", "Completed", "Close"]]},
-        fields=["name", "status", "review_date", "custom_assigned_to", "custom_allotted_to", "custom_overdue_reason"],
+        fields=[
+            "name",
+            "status",
+            "review_date",
+            "custom_assigned_to",
+            "custom_allotted_to",
+            "custom_overdue_reason",
+        ],
     )
 
     for task in tasks:
@@ -150,11 +188,7 @@ def send_overdue_reason_mail(task_doc):
         <p>Thanks,<br>ERP System</p>
     """
 
-    frappe.sendmail(
-        recipients=recipients,
-        subject=subject,
-        message=message
-    )
+    frappe.sendmail(recipients=recipients, subject=subject, message=message)
 
 
 def disable_core_task_overdue_job():
