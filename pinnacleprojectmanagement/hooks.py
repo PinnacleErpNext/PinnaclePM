@@ -53,9 +53,9 @@ app_include_js = [
 # include js in doctype views
 doctype_js = {"Task": "pinnacle_project_management/doctype/task/task.js",
               "Asset":"asset_customisation/doctype/assets/assets.js"}
-doctype_list_js = {
-    "Task": "public/js/task_customization.js",
-}
+# doctype_list_js = {
+#     "Task": "public/js/task_customization.js",
+# }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 

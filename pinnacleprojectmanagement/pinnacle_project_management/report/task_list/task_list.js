@@ -75,7 +75,6 @@ frappe.query_reports["Task List"] = {
       fieldtype: "Select",
       options: [
         "",
-        "Backlog",
         "Open",
         "Working",
         "Renewal Pending",
