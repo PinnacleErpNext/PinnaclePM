@@ -145,22 +145,34 @@ function applyRolePermissions(frm) {
 
   if (frappe.user.has_role("Projects User")) {
     editable_fields = ["status", "custom_overdue_reason", "progress"];
-  } else if (
-    frappe.user.has_role("Backlog Manager") &&
-    frm.doc.custom_allotted_to === frappe.session.user
-  ) {
+  } else if (frappe.user.has_role("Backlog Manager")) {
     editable_fields = [
+      "subject",
       "status",
-      "completed_on",
-      "completed_by",
-      "exp_start_date",
-      "exp_end_date",
-      "progress",
-      "expected_time",
-      "description",
+      "project",
+      "custom_module",
+      "priority",
+      "custom_category",
+      "custom_assigned_to",
       "custom_allotted_to",
+      "type",
+      "custom_tag",
+      "description",
+      "custom_followers",
+      "expected_time",
       "custom_overdue_reason",
     ];
+    if (frappe.session.user !== frm.doc.custom_allotted_to) {
+      editable_fields.push(
+        "custom__firebird_db_backup",
+        "custom__iis_feature_installation",
+        "custom__mygstcafe_setup_installation",
+        "custom_pg_admin_setup_installation",
+        "custom__software_update",
+        "custom__data_base_restore",
+        "custom__pg_setup_app_installation",
+      );
+    }
   } else if (frappe.user.has_role("Projects Manager")) {
     editable_fields = [
       "subject",
@@ -182,7 +194,7 @@ function applyRolePermissions(frm) {
       "completed_by",
       "review_date",
       "closing_date",
-      "actual_time",
+      "expected_time",
       "custom_overdue_reason",
       "progress",
     ];
