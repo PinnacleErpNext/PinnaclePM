@@ -147,7 +147,6 @@ function applyRolePermissions(frm) {
       "priority",
       "custom_category",
       "custom_assigned_to",
-      "custom_allotted_to",
       "type",
       "custom_tag",
       "description",
