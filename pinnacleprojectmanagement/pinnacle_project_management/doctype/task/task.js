@@ -62,12 +62,7 @@ function setTaskStatusOptions(frm) {
   const is_project_manager = frappe.user.has_role("Projects Manager") || false;
   const is_project_user = frappe.user.has_role("Projects User") || false;
   const is_backlog_manager = frappe.user.has_role("Backlog Manager") || false;
-  console.log("User Roles:", {
-    Admin: is_admin,
-    "Projects Manager": is_project_manager,
-    "Projects User": is_project_user,
-    "Backlog Manager": is_backlog_manager,
-  });
+  
   // ------------------------------------------------
   // 1️⃣ Project Specific Logic (Highest Priority)
   // ------------------------------------------------
@@ -117,7 +112,7 @@ function setTaskStatusOptions(frm) {
   else if (is_backlog_manager) {
     status_options = ["Open", "Close"];
   }
-
+ 
   if (!status_options.includes(frm.doc.status)) {
     status_options.push(frm.doc.status);
   }
