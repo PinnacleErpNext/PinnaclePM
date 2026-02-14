@@ -80,7 +80,6 @@ function setTaskStatusOptions(frm) {
   // ------------------------------------------------
   else if (is_admin) {
     status_options = [
-      "Backlog",
       "Open",
       "Working",
       "Can't Reproduce",
@@ -96,7 +95,6 @@ function setTaskStatusOptions(frm) {
   // ------------------------------------------------
   else if (is_project_manager) {
     status_options = [
-      "Backlog",
       "Open",
       "Working",
       "Can't Reproduce",
@@ -117,7 +115,7 @@ function setTaskStatusOptions(frm) {
   // 5️⃣ Backlog Manager
   // ------------------------------------------------
   else if (is_backlog_manager) {
-    status_options = ["Backlog", "Close"];
+    status_options = ["Open", "Close"];
   }
 
   if (!status_options.includes(frm.doc.status)) {
