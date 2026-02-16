@@ -128,7 +128,7 @@ def custom_set_tasks_as_overdue():
     for task in tasks:
         # Preserve core Pending Review behaviour
         if task.status == "Pending Review":
-            if task.review_date and getdate(task.review_date) > getdate(today()):
+            if task.review_date and getdate(task.review_date) >= getdate(today()):
                 continue
 
         task_doc = frappe.get_doc("Task", task.name)
@@ -145,8 +145,8 @@ def custom_set_tasks_as_overdue():
             frappe.db.set_value("Task", task_doc.name, "custom_overdue", 1)
 
             # 🔔 Send reminder mail if reason is not filled
-            if not task_doc.custom_overdue_reason:
-                send_overdue_reason_mail(task_doc)
+            # if not task_doc.custom_overdue_reason:
+            #     send_overdue_reason_mail(task_doc)
 
 
 def send_overdue_reason_mail(task_doc):

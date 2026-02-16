@@ -2052,7 +2052,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2026-02-12 12:26:07.001392",
+   "creation": "2026-02-16 11:51:07.657095",
    "default_value": null,
    "doc_type": "Task",
    "docstatus": 0,
@@ -2060,7 +2060,7 @@
    "field_name": "review_date",
    "idx": 0,
    "is_system_generated": 0,
-   "modified": "2026-02-14 16:02:05.632556",
+   "modified": "2026-02-16 11:51:07.657095",
    "modified_by": "Administrator",
    "module": null,
    "name": "Task-review_date-depends_on",
@@ -2068,14 +2068,14 @@
    "property": "depends_on",
    "property_type": "Data",
    "row_name": null,
-   "value": "eval: doc.__islocal || doc.status == \"Closed\" || doc.status == \"Pending Review\""
+   "value": ""
   },
   {
    "_assign": null,
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2026-02-14 17:08:13.486969",
+   "creation": "2026-02-16 11:45:50.787066",
    "default_value": null,
    "doc_type": "Task",
    "docstatus": 0,
@@ -2083,7 +2083,7 @@
    "field_name": "review_date",
    "idx": 0,
    "is_system_generated": 0,
-   "modified": "2026-02-14 17:08:13.486969",
+   "modified": "2026-02-16 11:45:50.787066",
    "modified_by": "Administrator",
    "module": null,
    "name": "Task-review_date-mandatory_depends_on",
@@ -2091,7 +2091,7 @@
    "property": "mandatory_depends_on",
    "property_type": "Data",
    "row_name": null,
-   "value": "eval: doc.project != \"Postgres Migration\"\n      && doc.status != \"Open\"\n      && doc.status != \"Backlog\"\n"
+   "value": "eval: doc.project != \"Postgres Migration\"\n      && doc.status != \"Open\"\n      && doc.status != \"Backlog\"\n      && doc.status != \"Working\"\n      && doc.status != \"Can't Reproduce\"\n"
   },
   {
    "_assign": null,
