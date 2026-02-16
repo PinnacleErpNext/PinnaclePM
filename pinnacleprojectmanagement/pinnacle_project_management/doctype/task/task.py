@@ -128,6 +128,7 @@ def custom_set_tasks_as_overdue():
     for task in tasks:
         # Preserve core Pending Review behaviour
         if task.status == "Pending Review":
+            print(getdate(today()), getdate(task.review_date))
             if task.review_date and getdate(task.review_date) > getdate(today()):
                 continue
 
