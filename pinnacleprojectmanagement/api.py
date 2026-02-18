@@ -259,7 +259,6 @@ def get_assets(filter_text=None, asset_category=None, component_filter=None, com
     return frappe.db.sql(query, params, as_dict=True)
 
 
-
 @frappe.whitelist()
 def download_assets_excel(filter_text=None, asset_category=None, component_filter=None, custodian_filter=None):
 
