@@ -63,6 +63,7 @@ def get_all_nodes(doctype, parent_field, parent_value=None):
 
     return child_projects + tasks
 
+
 @frappe.whitelist()
 def allot_task(task_data=None):
     """API to create a new Task Assignment document"""
@@ -73,7 +74,9 @@ def allot_task(task_data=None):
         # Extract task_data if not provided
         if not task_data:
             task_data = frappe.form_dict.get("task_data")
-            frappe.logger().info(f"[Bot Task API] Extracted task_data from form_dict: {task_data}")
+            frappe.logger().info(
+                f"[Bot Task API] Extracted task_data from form_dict: {task_data}"
+            )
 
         # If still empty, return error
         if not task_data:
@@ -91,7 +94,13 @@ def allot_task(task_data=None):
                 return {"status": 400, "message": msg}
 
         # Validate required fields
-        required_fields = ["subject", "assigned_to", "due_date", "task_detail", "created_by"]
+        required_fields = [
+            "subject",
+            "assigned_to",
+            "due_date",
+            "task_detail",
+            "created_by",
+        ]
         missing = [field for field in required_fields if not task_data.get(field)]
 
         if missing:
@@ -113,8 +122,7 @@ def allot_task(task_data=None):
 
         # Add reminder interval row
         doc.append(
-            "reminder_interval",
-            {"reminder_type": "Minute", "reminder_value": 5}
+            "reminder_interval", {"reminder_type": "Minute", "reminder_value": 5}
         )
 
         doc.insert(ignore_permissions=True)
@@ -155,7 +163,9 @@ def authenticate_user(email):
             frappe.logger().warning(f"[Bot Auth API] {msg}")
             return {"status": 404, "message": "User does not exist", "exist": False}
 
-        frappe.logger().info(f"[Bot Auth API] User '{email}' authenticated successfully")
+        frappe.logger().info(
+            f"[Bot Auth API] User '{email}' authenticated successfully"
+        )
 
         return {
             "status": 200,
@@ -167,9 +177,16 @@ def authenticate_user(email):
         frappe.logger().error(f"[Bot Auth API] Unexpected Error: {e}")
         frappe.log_error(frappe.get_traceback(), "User Authentication Error")
         return {"status": 500, "message": str(e), "exist": False}
-    
+
+
 @frappe.whitelist()
-def get_assets(filter_text=None, asset_category=None, component_filter=None, component_value=None, custodian_filter=None):
+def get_assets(
+    filter_text=None,
+    asset_category=None,
+    component_filter=None,
+    component_value=None,
+    custodian_filter=None,
+):
 
     AC_TABLE = "tabAsset Components"
 
@@ -181,11 +198,12 @@ def get_assets(filter_text=None, asset_category=None, component_filter=None, com
 
     if filter_text:
         like = f"%{filter_text}%"
-        conditions.append("""
+        conditions.append(
+            """
             (a.custom_asset_id LIKE %s
-            OR a.custom_custodian_name LIKE %s
             OR a.item_name LIKE %s)
-        """)
+        """
+        )
         params.extend([like, like, like])
 
     if asset_category:
@@ -193,11 +211,12 @@ def get_assets(filter_text=None, asset_category=None, component_filter=None, com
         params.append(asset_category)
 
     if custodian_filter:
-        conditions.append("a.custom_custodian_name = %s")
+        conditions.append("a.custodian = %s")
         params.append(custodian_filter)
 
     if component_filter and component_value:
-        conditions.append("""
+        conditions.append(
+            """
             EXISTS (
                 SELECT 1
                 FROM `tabAsset Components` ac2
@@ -205,18 +224,21 @@ def get_assets(filter_text=None, asset_category=None, component_filter=None, com
                 AND ac2.component_name = %s
                 AND ac2.specification LIKE %s
             )
-        """)
+        """
+        )
         params.extend([component_filter, f"%{component_value}%"])
 
     elif component_filter:
-        conditions.append("""
+        conditions.append(
+            """
             EXISTS (
                 SELECT 1
                 FROM `tabAsset Components` ac2
                 WHERE ac2.asset = a.name
                 AND ac2.component_name = %s
             )
-        """)
+        """
+        )
         params.append(component_filter)
 
     where_clause = "WHERE " + " AND ".join(conditions)
@@ -227,7 +249,7 @@ def get_assets(filter_text=None, asset_category=None, component_filter=None, com
             a.custom_asset_id AS asset_id,
             a.asset_name AS asset_name,
             a.location AS location,
-            a.custom_custodian_name AS used_by,
+            (select e.employee_name from `tabEmployee` e where e.name = a.custodian) AS used_by,
             a.item_name,
             a.asset_category,
 
@@ -248,19 +270,19 @@ def get_assets(filter_text=None, asset_category=None, component_filter=None, com
             a.name, 
             a.custom_asset_id,
             a.asset_name,
-            a.location, 
-            a.custom_custodian_name, 
+            a.location,
             a.item_name, 
             a.asset_category
 
         ORDER BY a.custom_asset_id
     """
-
     return frappe.db.sql(query, params, as_dict=True)
 
 
 @frappe.whitelist()
-def download_assets_excel(filter_text=None, asset_category=None, component_filter=None, custodian_filter=None):
+def download_assets_excel(
+    filter_text=None, asset_category=None, component_filter=None, custodian_filter=None
+):
 
     data = get_assets(filter_text, asset_category, component_filter, custodian_filter)
 
@@ -332,11 +354,7 @@ def download_assets_excel(filter_text=None, asset_category=None, component_filte
     wb.save(file_path)
 
     file_doc = save_file(
-        file_name,
-        open(file_path, "rb").read(),
-        None,
-        None,
-        is_private=1
+        file_name, open(file_path, "rb").read(), None, None, is_private=1
     )
 
     return file_doc.file_url

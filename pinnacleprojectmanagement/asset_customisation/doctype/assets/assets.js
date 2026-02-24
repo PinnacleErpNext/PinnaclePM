@@ -1,5 +1,20 @@
 frappe.ui.form.on("Asset", {
   refresh(frm) {
+    if (frm.doc.custodian) {
+      frappe.call({
+        method: "frappe.client.get",
+        args: {
+          doctype: "Employee",
+          name: frm.doc.custodian,
+        },
+        callback(r) {
+          if (r.message) {
+            frm.doc.custom_custodian_name = r.message.employee_name;
+            frm.refresh_field("custom_custodian_name");
+          }
+        },
+      });
+    }
     if (!frm.is_new()) {
       frm.add_custom_button("Manage Components", () => {
         let original_components = [];
@@ -269,5 +284,45 @@ frappe.ui.form.on("Asset", {
         };
       });
     }
+  },
+  before_save: function (frm) {
+    // Skip validation if already confirmed
+    if (frm._asset_allotment_confirmed) {
+      return;
+    }
+
+    if (!frm.doc.custodian || !frm.doc.asset_category) {
+      return;
+    }
+
+    frappe.validated = false;
+
+    frappe.call({
+      method:
+        "pinnacleprojectmanagement.asset_customisation.doctype.assets.assets.validate_asset_allotment",
+      args: {
+        doc: frm.doc,
+      },
+      callback: function (r) {
+        if (r.message) {
+          frappe.confirm(
+            "This custodian already has an asset in this category.<br><br>Do you want to re-allot this asset?",
+            function () {
+              // ✅ Set flag so validation does not run again
+              frm._asset_allotment_confirmed = true;
+
+              frappe.validated = true;
+              frm.save();
+            },
+            function () {
+              frappe.validated = false;
+            },
+          );
+        } else {
+          frappe.validated = true;
+          frm.save();
+        }
+      },
+    });
   },
 });

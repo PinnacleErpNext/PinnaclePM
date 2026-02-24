@@ -35,7 +35,7 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
       </div>
 
       <div class="col-md-3 form-group">
-        <label>Search (Asset ID / Custodian / Item Name)</label>
+        <label>Search (Asset ID / Item Name)</label>
         <input id="filter_text" class="form-control" placeholder="optional">
       </div>
 
@@ -175,18 +175,48 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
     method: "frappe.client.get_list",
     args: {
       doctype: "Asset",
-      fields: ["custom_custodian_name"],
-      filters: { docstatus: 1 },
-      limit_page_length: 1000,
+      fields: ["custodian"],
+      filters: {
+        docstatus: 1,
+        custodian: ["is", "set"],
+      },
+      group_by: "custodian",
+      limit_page_length: 0,
     },
     callback: function (res) {
-      const custodians = new Set();
-      (res.message || []).forEach((r) => {
-        if (r.custom_custodian_name) custodians.add(r.custom_custodian_name);
-      });
+      if (!res.message || !res.message.length) return;
 
-      custodians.forEach((c) => {
-        $("#custodian_filter").append(`<option value="${c}">${c}</option>`);
+      const employee_ids = res.message.map((r) => r.custodian);
+
+      // Fetch Employees
+      frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+          doctype: "Employee",
+          fields: ["name", "employee_name"],
+          filters: {
+            name: ["in", employee_ids],
+          },
+          limit_page_length: 0,
+        },
+        callback: function (emp_res) {
+          const $filter = $("#custodian_filter");
+          $filter.empty();
+          $filter.append(`<option value="">Select Custodian</option>`);
+
+          (emp_res.message || [])
+            .sort((a, b) =>
+              (a.employee_name || "").localeCompare(b.employee_name || ""),
+            )
+            .forEach((emp) => {
+              const label = frappe.utils.escape_html(
+                emp.employee_name || emp.name,
+              );
+              const value = frappe.utils.escape_html(emp.name); // 👈 custodian ID
+
+              $filter.append(`<option value="${value}">${label}</option>`);
+            });
+        },
       });
     },
   });
@@ -231,7 +261,13 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
   // ---------------------------
   $form.find("#fetch_records").click(function () {
     frappe.dom.freeze("Loading...");
-
+    console.log("Fetching records with filters:", {
+      filter_text: $("#filter_text").val(),
+      asset_category: $("#category_filter").val(),
+      component_filter: $("#component_filter").val(),
+      component_value: $("#component_value_filter").val(),
+      custodian_filter: $("#custodian_filter").val(),
+    });
     frappe.call({
       method: "pinnacleprojectmanagement.api.get_assets",
       args: {

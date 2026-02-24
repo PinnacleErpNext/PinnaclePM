@@ -51,8 +51,11 @@ app_include_js = [
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Task": "pinnacle_project_management/doctype/task/task.js",
-              "Asset":"asset_customisation/doctype/assets/assets.js"}
+doctype_js = {
+    "Task": "pinnacle_project_management/doctype/task/task.js",
+    "Asset": "asset_customisation/doctype/assets/assets.js",
+    "Asset Movement": "asset_customisation/doctype/asset_movement/asset_movement.js",
+}
 # doctype_list_js = {
 #     "Task": "public/js/task_customization.js",
 # }
@@ -130,12 +133,12 @@ doctype_js = {"Task": "pinnacle_project_management/doctype/task/task.js",
 
 permission_query_conditions = {
     "Task Assignment": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.get_permission_query_conditions",
-    "Task": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.task.get_permission_query_conditions"
+    "Task": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.task.get_permission_query_conditions",
 }
 
 has_permission = {
     "Task Assignment": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.has_permission",
-    "Task": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.task.has_permission"
+    "Task": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.task.has_permission",
 }
 
 # DocType Class
@@ -164,7 +167,7 @@ doc_events = {
         # "on_update": "pinnacleprojectmanagement.pinnacle_project_management.allottment.task_allottment",
         # "after_insert": "pinnacleprojectmanagement.pinnacle_project_management.allottment.task_allottment",
         "validate": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.task.validate",
-        "before_save": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.task.before_save"
+        "before_save": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.task.before_save",
     },
     "Project": {
         "after_insert": "pinnacleprojectmanagement.pinnacle_project_management.allottment.project_allottment",
@@ -186,7 +189,6 @@ scheduler_events = {
     # ],
     "daily": [
         "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.task.custom_set_tasks_as_overdue"
-
     ],
     # "hourly": [
     # 	"pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.process_task_reminders"
