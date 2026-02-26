@@ -31,7 +31,7 @@ after_migrate = "pinnacleprojectmanagement.pinnacle_project_management.doctype.t
 # include js, css files in header of desk.html
 # app_include_css = "/assets/pinnacleprojectmanagement/css/pinnacleprojectmanagement.css"
 app_include_js = [
-    # "/assets/pinnacleprojectmanagement/js/hide_list_view.js",
+    "/assets/pinnacleprojectmanagement/js/hide_list_view.js",
     "/assets/pinnacleprojectmanagement/js/reminder_popup.js",
     # "/assets/pinnacleprojectmanagement/js/breadcrumbs_manager.js"
 ]
