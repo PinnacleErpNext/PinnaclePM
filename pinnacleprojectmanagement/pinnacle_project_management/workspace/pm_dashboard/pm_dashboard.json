@@ -1,4 +1,5 @@
 {
+ "app": "pinnacleprojectmanagement",
  "charts": [],
  "content": "[{\"id\":\"BB0-QwgoMz\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Dashboard</b></span>\",\"col\":12}},{\"id\":\"qm2_YQRnkt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Projects\",\"col\":4}},{\"id\":\"WGH2zZFmms\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tasks\",\"col\":4}},{\"id\":\"mnWhQOBh5E\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Modules\",\"col\":4}},{\"id\":\"gD3k4eYnRt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Backlog\",\"col\":3}}]",
  "creation": "2025-02-14 11:42:03.572882",
@@ -13,7 +14,7 @@
  "is_hidden": 0,
  "label": "PM-Dashboard",
  "links": [],
- "modified": "2025-04-26 15:17:30.679247",
+ "modified": "2026-03-05 16:42:37.759197",
  "modified_by": "Administrator",
  "module": "Pinnacle Project Management",
  "name": "PM-Dashboard",
@@ -46,31 +47,36 @@
    "doc_view": "List",
    "icon": "",
    "label": "Projects",
-   "link_to": "Project List",
-   "type": "Report"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Backlog",
-   "type": "URL",
-   "url": "http://proj.mygstcafe.in:8018/app/query-report/Task%20List?status=Backlog"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Modules",
-   "link_to": "Modules List",
+   "link_to": "Project",
    "stats_filter": "[]",
-   "type": "Report"
+   "type": "DocType"
   },
   {
    "color": "Grey",
    "doc_view": "List",
    "label": "Tasks",
-   "link_to": "Task List",
-   "type": "Report"
+   "link_to": "Task",
+   "stats_filter": "[[\"Task\",\"status\",\"=\",\"Working\"]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Modules",
+   "link_to": "Modules",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Backlog",
+   "link_to": "Task",
+   "stats_filter": "[[\"Task\",\"status\",\"=\",\"Open\"]]",
+   "type": "DocType",
+   "url": "http://pm.mygstcafe.in/app/query-report/Task%20List?status=Backlog"
   }
  ],
- "title": "PM-Dashboard"
+ "title": "PM-Dashboard",
+ "type": "Workspace"
 }
