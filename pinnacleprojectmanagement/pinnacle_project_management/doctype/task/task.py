@@ -6,7 +6,10 @@ from frappe.utils import cint, getdate, today, get_url_to_form
 def before_save(self, method):
     if self.exp_end_date:
         if not self.review_date:
-            self.review_date = getdate(self.exp_end_date) + timedelta(days=1)
+            review_date = getdate(self.exp_end_date) + timedelta(days=1)
+            if review_date.weekday() == 6:
+                review_date += timedelta(days=1)
+            self.review_date = review_date
 
 
 def validate(self, method):
@@ -22,6 +25,107 @@ def validate(self, method):
         frappe.throw(
             "Please complete all checklist items before marking the task as Completed."
         )
+
+# ------------------------------
+# Permissions 
+# ------------------------------
+
+def get_permission_query_conditions(user):
+    if not user:
+        user = frappe.session.user
+
+    # Administrator → no restriction
+    if user == "Administrator":
+        return ""
+
+    roles = frappe.get_roles(user)
+
+    # -----------------------------
+    # UNIVERSAL RULE
+    # -----------------------------
+    base_condition = f"""
+        (
+            `tabTask`.custom_assigned_to = '{user}'
+            OR `tabTask`.custom_allotted_to = '{user}'
+        )
+    """
+
+    # -----------------------------
+    # Projects Manager
+    # -----------------------------
+    if "Projects Manager" in roles:
+
+        permitted_projects = frappe.get_all(
+            "User Permission",
+            filters={"user": user, "allow": "Project"},
+            pluck="for_value",
+        )
+
+        if permitted_projects:
+            projects = "', '".join(permitted_projects)
+
+            return f"""
+            (
+                {base_condition}
+                OR `tabTask`.project IN ('{projects}')
+            )
+            """
+
+        return base_condition
+
+    # -----------------------------
+    # Backlog Manager
+    # -----------------------------
+    if "Backlog Manager" in roles:
+        return f"""
+        (
+            {base_condition}
+            OR `tabTask`.owner = '{user}'
+        )
+        """
+
+    # -----------------------------
+    # Projects User
+    # -----------------------------
+    if "Projects User" in roles:
+        return base_condition
+
+    # default fallback
+    return base_condition
+
+
+def has_permission(doc, user=None):
+    if not user:
+        user = frappe.session.user
+
+    if user == "Administrator":
+        return True
+
+    roles = frappe.get_roles(user)
+
+    # UNIVERSAL RULE
+    if doc.custom_assigned_to == user or doc.custom_allotted_to == user:
+        return True
+
+    # Backlog Manager
+    if "Backlog Manager" in roles:
+        if doc.owner == user:
+            return True
+
+    # Projects Manager
+    if "Projects Manager" in roles:
+        permitted = frappe.db.exists(
+            "User Permission",
+            {
+                "user": user,
+                "allow": "Project",
+                "for_value": doc.project,
+            },
+        )
+        if permitted:
+            return True
+
+    return False
 
 
 def on_update(doc, method):

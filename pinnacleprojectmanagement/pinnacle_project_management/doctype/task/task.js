@@ -164,8 +164,10 @@ function applyRolePermissions(frm) {
   }
 
   if (frappe.user.has_role("Projects User")) {
+    console.log("User has Projects User role - applying limited edit permissions");
     editable_fields = ["status", "custom_overdue_reason", "progress"];
   } else if (frappe.user.has_role("Backlog Manager")) {
+    console.log("User has Backlog Manager role - applying full edit permissions");
     editable_fields = [
       "subject",
       "status",
@@ -203,6 +205,7 @@ function applyRolePermissions(frm) {
       );
     }
   } else if (frappe.user.has_role("Projects Manager")) {
+    console.log("User has Projects Manager role - applying mostly edit permissions");
     editable_fields = [
       "subject",
       "status",
@@ -236,7 +239,7 @@ function applyRolePermissions(frm) {
 
     frm.set_df_property(
       fieldname,
-      "read_only",
+      "hidden",
       editable_fields.includes(fieldname) ? 0 : 1,
     );
   });
