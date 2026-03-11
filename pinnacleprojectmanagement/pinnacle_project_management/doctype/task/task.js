@@ -222,6 +222,7 @@ function applyRolePermissions(frm) {
       "description",
       "custom_followers",
       "is_group",
+      "parent_task",
       "completed_on",
       "completed_by",
       "review_date",
@@ -239,7 +240,7 @@ function applyRolePermissions(frm) {
 
     frm.set_df_property(
       fieldname,
-      "hidden",
+      "read_only",
       editable_fields.includes(fieldname) ? 0 : 1,
     );
   });
