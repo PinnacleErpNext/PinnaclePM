@@ -1,5 +1,6 @@
 {
  "add_total_row": 0,
+ "add_translate_data": 0,
  "columns": [
   {
    "fieldname": "project_name",
@@ -9,7 +10,7 @@
   }
  ],
  "creation": "2025-02-12 16:09:39.395000",
- "disabled": 0,
+ "disabled": 1,
  "docstatus": 0,
  "doctype": "Report",
  "filters": [
@@ -23,8 +24,8 @@
  ],
  "idx": 16,
  "is_standard": "Yes",
- "letterhead": null,
- "modified": "2025-02-19 15:48:44.413952",
+ "letter_head": null,
+ "modified": "2026-03-18 12:22:37.647714",
  "modified_by": "Administrator",
  "module": "Pinnacle Project Management",
  "name": "Project List",
