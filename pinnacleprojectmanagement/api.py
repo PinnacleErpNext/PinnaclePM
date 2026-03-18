@@ -198,13 +198,15 @@ def get_assets(
 
     if filter_text:
         like = f"%{filter_text}%"
-        conditions.append(
-            """
-            (a.custom_asset_id LIKE %s
-            OR a.item_name LIKE %s)
-        """
-        )
-        params.extend([like, like, like])
+        conditions.append("""
+            (
+                a.custom_asset_id LIKE %s
+                OR a.custom_custodian_name LIKE %s
+                OR a.item_name LIKE %s
+                OR a.location LIKE %s
+            )
+        """)
+        params.extend([like, like, like, like])
 
     if asset_category:
         conditions.append("a.asset_category = %s")

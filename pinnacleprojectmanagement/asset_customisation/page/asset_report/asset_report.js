@@ -35,7 +35,7 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
       </div>
 
       <div class="col-md-3 form-group">
-        <label>Search (Asset ID / Item Name)</label>
+        <label>Search (Asset ID / Item Name / Location)</label>
         <input id="filter_text" class="form-control" placeholder="optional">
       </div>
 
@@ -122,19 +122,15 @@ frappe.pages["asset-report"].on_page_load = function (wrapper) {
   frappe.call({
     method: "frappe.client.get_list",
     args: {
-      doctype: "Asset",
-      fields: ["asset_category"],
-      filters: { docstatus: 1 },
+      doctype: "Asset Category",
+      fields: ["name"],
       limit_page_length: 1000,
     },
     callback: function (res) {
-      const categories = new Set();
       (res.message || []).forEach((r) => {
-        if (r.asset_category) categories.add(r.asset_category);
-      });
-
-      categories.forEach((cat) => {
-        $("#category_filter").append(`<option value="${cat}">${cat}</option>`);
+        $form
+          .find("#category_filter")
+          .append(`<option value="${r.name}">${r.name}</option>`);
       });
     },
   });

@@ -26,23 +26,16 @@ def validate(self, method):
             "Please complete all checklist items before marking the task as Completed."
         )
 
-# ------------------------------
-# Permissions 
-# ------------------------------
 
 def get_permission_query_conditions(user):
     if not user:
         user = frappe.session.user
 
-    # Administrator → no restriction
     if user == "Administrator":
         return ""
 
     roles = frappe.get_roles(user)
 
-    # -----------------------------
-    # UNIVERSAL RULE
-    # -----------------------------
     base_condition = f"""
         (
             `tabTask`.custom_assigned_to = '{user}'
@@ -50,9 +43,7 @@ def get_permission_query_conditions(user):
         )
     """
 
-    # -----------------------------
     # Projects Manager
-    # -----------------------------
     if "Projects Manager" in roles:
 
         permitted_projects = frappe.get_all(
@@ -73,25 +64,61 @@ def get_permission_query_conditions(user):
 
         return base_condition
 
-    # -----------------------------
     # Backlog Manager
-    # -----------------------------
     if "Backlog Manager" in roles:
+
         return f"""
         (
-            {base_condition}
+            `tabTask`.project = 'Postgres Migration'
+            OR {base_condition}
             OR `tabTask`.owner = '{user}'
         )
         """
 
-    # -----------------------------
     # Projects User
-    # -----------------------------
     if "Projects User" in roles:
         return base_condition
 
-    # default fallback
     return base_condition
+
+
+def has_permission(doc, user=None):
+    if not user:
+        user = frappe.session.user
+
+    if user == "Administrator":
+        return True
+
+    roles = frappe.get_roles(user)
+
+    # Backlog Manager → Full access to Postgres Migration
+    if "Backlog Manager" in roles:
+        if doc.project == "Postgres Migration":
+            return True
+
+    # Universal rule
+    if doc.custom_assigned_to == user or doc.custom_allotted_to == user:
+        return True
+
+    # Owner rule
+    if "Backlog Manager" in roles:
+        if doc.owner == user:
+            return True
+
+    # Projects Manager
+    if "Projects Manager" in roles:
+        permitted = frappe.db.exists(
+            "User Permission",
+            {
+                "user": user,
+                "allow": "Project",
+                "for_value": doc.project,
+            },
+        )
+        if permitted:
+            return True
+
+    return False
 
 
 def has_permission(doc, user=None):
@@ -107,12 +134,19 @@ def has_permission(doc, user=None):
     if doc.custom_assigned_to == user or doc.custom_allotted_to == user:
         return True
 
+    # -----------------------------
     # Backlog Manager
+    # -----------------------------
     if "Backlog Manager" in roles:
         if doc.owner == user:
             return True
 
+        if doc.project == "Postgress Migration":
+            return True
+
+    # -----------------------------
     # Projects Manager
+    # -----------------------------
     if "Projects Manager" in roles:
         permitted = frappe.db.exists(
             "User Permission",
