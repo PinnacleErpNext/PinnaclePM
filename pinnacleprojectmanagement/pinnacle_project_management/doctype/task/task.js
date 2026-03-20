@@ -230,6 +230,7 @@ function applyRolePermissions(frm) {
       "expected_time",
       "custom_overdue_reason",
       "progress",
+      "depends_on"
     ];
   }
 
