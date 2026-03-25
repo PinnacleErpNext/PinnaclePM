@@ -1,6 +1,6 @@
 frappe.ui.form.on("Task", {
   onload(frm) {
-    applyBreadcrumbs(frm);
+    // applyBreadcrumbs(frm);
     applyRolePermissions(frm);
     setTaskStatusOptions(frm);
   },
