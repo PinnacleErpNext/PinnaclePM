@@ -37,13 +37,19 @@ def get_permission_query_conditions(user):
     if not user:
         user = frappe.session.user
 
-    if "Administrator" == user:
+    if user == "Administrator":
         return ""
 
-    return """(`tabWork Assignment`.assigned_by = '{user}' 
-               OR `tabWork Assignment`.`assigned_to` = '{user}')""".format(
-        user=user
-    )
+    return f"""
+        (
+            `tabWork Assignment`.assigned_by = {frappe.db.escape(user)}
+            OR EXISTS (
+                SELECT 1 FROM `tabWork user` user
+                WHERE user.parent = `tabWork Assignment`.name
+                AND user.user = {frappe.db.escape(user)}
+            )
+        )
+    """
 
 
 def has_permission(doc, user=None):
@@ -52,10 +58,14 @@ def has_permission(doc, user=None):
 
     if user == "Administrator":
         return True
+
     if doc.assigned_by == user:
         return True
-    if doc.assigned_to == user:
-        return True
+
+    # ✅ check in child table
+    for d in doc.assigned_to:
+        if d.user == user:   # change field name if different
+            return True
 
     return False
 

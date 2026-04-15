@@ -132,12 +132,12 @@ doctype_js = {
 # Permissions evaluated in scripted ways
 
 permission_query_conditions = {
-    "Task Assignment": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.get_permission_query_conditions",
+    "Work Assignment": "pinnacleprojectmanagement.pinnacle_project_management.doctype.work_assignment.work_assignment.get_permission_query_conditions",
     "Task": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.task.get_permission_query_conditions",
 }
 
 has_permission = {
-    "Task Assignment": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.has_permission",
+    "Work Assignment": "pinnacleprojectmanagement.pinnacle_project_management.doctype.work_assignment.work_assignment.has_permission",
     "Task": "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.task.has_permission",
 }
 
@@ -181,17 +181,17 @@ doc_events = {
 scheduler_events = {
     "cron": {
         "*/1 * * * *": [
-            "pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.test_cron"
+            "pinnacleprojectmanagement.pinnacle_project_management.doctype.work_assignment.work_assignment.test_cron"
         ]
     },
     # "all": [
-    # 	"pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.process_task_reminders"
+    # 	"pinnacleprojectmanagement.pinnacle_project_management.doctype.work_assignment.work_assignment.process_task_reminders"
     # ],
     "daily": [
         "pinnacleprojectmanagement.pinnacle_project_management.doctype.task.task.custom_set_tasks_as_overdue"
     ],
     # "hourly": [
-    # 	"pinnacleprojectmanagement.pinnacle_project_management.doctype.task_assignment.task_assignment.process_task_reminders"
+    # 	"pinnacleprojectmanagement.pinnacle_project_management.doctype.work_assignment.work_assignment.process_task_reminders"
     # ],
     # "weekly": [
     # 	"pinnacleprojectmanagement.tasks.weekly"

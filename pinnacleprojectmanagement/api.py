@@ -66,34 +66,21 @@ def get_all_nodes(doctype, parent_field, parent_value=None):
 
 @frappe.whitelist()
 def allot_task(task_data=None):
-    """API to create a new Task Assignment document"""
     try:
-        # Log incoming request
         frappe.logger().info(f"[Bot Task API] Received form data: {frappe.form_dict}")
 
-        # Extract task_data if not provided
         if not task_data:
             task_data = frappe.form_dict.get("task_data")
-            frappe.logger().info(
-                f"[Bot Task API] Extracted task_data from form_dict: {task_data}"
-            )
 
-        # If still empty, return error
         if not task_data:
-            msg = "No task_data provided"
-            frappe.logger().error(f"[Bot Task API] {msg}")
-            return {"status": 400, "message": msg}
+            return {"status": 400, "message": "No task_data provided"}
 
-        # Parse JSON if sent as string
         if isinstance(task_data, str):
             try:
                 task_data = json.loads(task_data)
-            except json.JSONDecodeError as e:
-                msg = "Invalid JSON format in task_data"
-                frappe.logger().error(f"[Bot Task API] JSON error: {e}")
-                return {"status": 400, "message": msg}
+            except json.JSONDecodeError:
+                return {"status": 400, "message": "Invalid JSON format in task_data"}
 
-        # Validate required fields
         required_fields = [
             "subject",
             "assigned_to",
@@ -101,34 +88,53 @@ def allot_task(task_data=None):
             "task_detail",
             "created_by",
         ]
-        missing = [field for field in required_fields if not task_data.get(field)]
 
+        missing = [f for f in required_fields if not task_data.get(f)]
         if missing:
-            msg = f"Missing required fields: {', '.join(missing)}"
-            frappe.logger().error(f"[Bot Task API] {msg}")
-            return {"status": 400, "message": msg}
+            return {"status": 400, "message": f"Missing required fields: {', '.join(missing)}"}
 
-        # Create Task Assignment record
-        doc = frappe.get_doc(
-            {
-                "doctype": "Work Assignment",
-                "subject": task_data["subject"],
-                "assigned_to": task_data["assigned_to"],
-                "due_date": task_data["due_date"],
-                "task_detail": task_data["task_detail"],
-                "assigned_by": task_data["created_by"],
-            }
-        )
+        # ✅ Normalize assigned_to
+        def normalize_assigned_to(value):
+            if not value:
+                return []
 
-        # Add reminder interval row
-        doc.append(
-            "reminder_interval", {"reminder_type": "Minute", "reminder_value": 5}
-        )
+            if isinstance(value, list):
+                return value
+
+            if isinstance(value, str):
+                separators = [",", "and", "&"]
+                for sep in separators:
+                    if sep in value:
+                        return [v.strip().title() for v in value.split(sep) if v.strip()]
+                return [value.strip().title()]
+
+            return []
+
+        assigned_users = normalize_assigned_to(task_data["assigned_to"])
+
+        # ✅ Create doc WITHOUT assigned_to first
+        doc = frappe.get_doc({
+            "doctype": "Work Assignment",
+            "subject": task_data["subject"],
+            "due_date": task_data["due_date"],
+            "task_detail": task_data["task_detail"],
+            "assigned_by": task_data["created_by"],
+        })
+
+        # ✅ Append multiple assigned users
+        for user in assigned_users:
+            doc.append("assigned_to", {
+                "user": user   # ⚠️ change fieldname if different
+            })
+
+        # Reminder
+        doc.append("reminder_interval", {
+            "reminder_type": "Minute",
+            "reminder_value": 5
+        })
 
         doc.insert(ignore_permissions=True)
         frappe.db.commit()
-
-        frappe.logger().info(f"[Bot Task API] Task created successfully: {doc.name}")
 
         return {
             "status": 200,
@@ -138,9 +144,7 @@ def allot_task(task_data=None):
         }
 
     except Exception as e:
-        # Log full traceback
-        frappe.logger().error(f"[Bot Task API] Unexpected error: {e}")
-        frappe.log_error(frappe.get_traceback(), "Task Assignment Error")
+        frappe.log_error(frappe.get_traceback(), "Work Assignment Error")
         return {"status": 500, "message": str(e)}
 
 
