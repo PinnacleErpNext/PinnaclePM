@@ -13,9 +13,16 @@ class WorkAssignment(Document):
         schedule_job()
 
     def after_insert(self):
-        # Optional: send immediate notification when task is created
-        if self.assigned_to:
-            user_email = frappe.db.get_value("User", self.assigned_to, "email")
+        if not self.assigned_to:
+            return
+
+        for row in self.assigned_to:
+            user = row.user
+            if not user:
+                continue
+
+            user_email = frappe.db.get_value("User", user, "email")
+
             if user_email:
                 frappe.sendmail(
                     recipients=[user_email],
@@ -37,13 +44,19 @@ def get_permission_query_conditions(user):
     if not user:
         user = frappe.session.user
 
-    if "Administrator" == user:
+    if user == "Administrator":
         return ""
 
-    return """(`tabWork Assignment`.assigned_by = '{user}' 
-               OR `tabWork Assignment`.`assigned_to` = '{user}')""".format(
-        user=user
-    )
+    return f"""
+        (
+            `tabWork Assignment`.assigned_by = {frappe.db.escape(user)}
+            OR EXISTS (
+                SELECT 1 FROM `tabWork user` user
+                WHERE user.parent = `tabWork Assignment`.name
+                AND user.user = {frappe.db.escape(user)}
+            )
+        )
+    """
 
 
 def has_permission(doc, user=None):
@@ -52,10 +65,14 @@ def has_permission(doc, user=None):
 
     if user == "Administrator":
         return True
+
     if doc.assigned_by == user:
         return True
-    if doc.assigned_to == user:
-        return True
+
+    # ✅ check in child table
+    for d in doc.assigned_to:
+        if d.user == user:   # change field name if different
+            return True
 
     return False
 
@@ -102,7 +119,6 @@ def process_task_reminders():
         fields=[
             "name",
             "subject",
-            "assigned_to",
             "remind_at",
             "remind_till",
             "no_of_occurence",
@@ -198,22 +214,34 @@ def get_interval_in_seconds(interval_type, value):
 
 
 def trigger_popup_and_email(doc):
-    """Send popup + email to assigned user globally in ERP"""
-    user = doc.assigned_to
+    """Send popup + email to ALL assigned users"""
+
+    if not doc.assigned_to:
+        return
+
     message = f"⏰ Reminder: Task <b>{doc.subject}</b> is due soon!"
-    print(f"Sending reminder for task {doc.name} to user {user}")
-    # ✅ Real-time popup
-    if user:
-        print(f"Publishing to user: {user}")
+
+    for row in doc.assigned_to:
+        user = row.user
+        if not user:
+            continue
+
+        print(f"Sending reminder for task {doc.name} to user {user}")
+
+        # ✅ Real-time popup
         frappe.publish_realtime(
             event="task_reminder_popup",
-            message={"title": "Task Reminder", "message": message, "task": doc.name},
+            message={
+                "title": "Task Reminder",
+                "message": message,
+                "task": doc.name,
+            },
             user=user,
         )
 
-    # ✅ Email
-    if user:
+        # ✅ Email
         user_email = frappe.db.get_value("User", user, "email")
+
         if user_email:
             frappe.sendmail(
                 recipients=[user_email],

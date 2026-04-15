@@ -2,7 +2,11 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Work Assignment", {
-  refresh(frm) {},
+  refresh(frm) {
+    if (frm.is_new()) {
+      frm.set_value("assigned_by", frappe.session.user);
+    }
+  },
 });
 frappe.realtime.on("show_reminder_popup", (data) => {
   frappe.show_alert({
