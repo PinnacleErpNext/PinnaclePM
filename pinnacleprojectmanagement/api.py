@@ -140,7 +140,7 @@ def allot_task(task_data=None):
             "status": 200,
             "message": "Task created successfully!",
             "doc": doc.as_dict(),
-            "link": f"/app/task-assignment/{doc.name}",
+            "link": f"/work-assignment/{doc.name}",
         }
 
     except Exception as e:
