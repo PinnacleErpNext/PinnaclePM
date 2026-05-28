@@ -24,7 +24,7 @@ function setAssetId(frm) {
             let employee = asset.custodian;
 
             if (!employee) {
-                frm.set_value("custom_custodian_name", "");
+                frm.doc.custodian_name = "";
                 return null;
             }
 
@@ -33,10 +33,7 @@ function setAssetId(frm) {
         .then(employee => {
 
             if (employee) {
-                frm.set_value(
-                    "custom_custodian_name",
-                    `${employee.name} : ${employee.employee_name}`
-                );
+                frm.doc.custodian_name = `${employee.name} : ${employee.employee_name}`;
             }
 
         });
