@@ -54,6 +54,7 @@ app_include_js = [
 doctype_js = {
     "Task": "pinnacle_project_management/doctype/task/task.js",
     "Asset": "asset_customisation/doctype/assets/assets.js",
+    "Asset Repair": "asset_customisation/doctype/asset_repair/asset_repair.js",
     "Asset Movement": "asset_customisation/doctype/asset_movement/asset_movement.js",
 }
 # doctype_list_js = {

@@ -1,4 +1,13 @@
 frappe.ui.form.on("Asset", {
+  setup(frm) {
+    frm.set_query("custodian", function () {
+      return {
+        filters: {
+          company: frm.doc.company,
+        },
+      };
+    });
+  },
   refresh(frm) {
     if (frm.doc.custodian) {
       frappe.call({
@@ -285,8 +294,7 @@ frappe.ui.form.on("Asset", {
       });
     }
   },
-  before_save: function (frm) {
-    // Skip validation if already confirmed
+  async validate(frm) {
     if (frm._asset_allotment_confirmed) {
       return;
     }
@@ -295,34 +303,24 @@ frappe.ui.form.on("Asset", {
       return;
     }
 
-    frappe.validated = false;
-
-    frappe.call({
+    let r = await frappe.call({
       method:
         "pinnacleprojectmanagement.asset_customisation.doctype.assets.assets.validate_asset_allotment",
       args: {
         doc: frm.doc,
       },
-      callback: function (r) {
-        if (r.message) {
-          frappe.confirm(
-            "This custodian already has an asset in this category.<br><br>Do you want to re-allot this asset?",
-            function () {
-              // ✅ Set flag so validation does not run again
-              frm._asset_allotment_confirmed = true;
-
-              frappe.validated = true;
-              frm.save();
-            },
-            function () {
-              frappe.validated = false;
-            },
-          );
-        } else {
-          frappe.validated = true;
-          frm.save();
-        }
-      },
     });
+
+    if (r.message) {
+      frappe.validated = false;
+
+      frappe.confirm(
+        "This custodian already has an asset in this category.<br><br>Do you want to re-allot this asset?",
+        function () {
+          frm._asset_allotment_confirmed = true;
+          frm.save();
+        },
+      );
+    }
   },
 });
