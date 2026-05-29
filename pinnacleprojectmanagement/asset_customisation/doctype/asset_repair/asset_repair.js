@@ -8,6 +8,23 @@ frappe.ui.form.on("Asset Repair", {
   },
 });
 
+frappe.ui.form.on("Asset Repair Purchase Invoice", {
+  purchase_invoice(frm, cdt, cdn) {
+    let row = locals[cdt][cdn];
+
+    if (!row.purchase_invoice) return;
+
+    frappe.db.get_doc("Purchase Invoice", row.purchase_invoice).then((doc) => {
+      // Set in parent doctype
+      frm.set_value("custom_supplier", doc.supplier);
+
+      frm.set_value("custom_invoice_date", doc.bill_date || doc.posting_date);
+
+      frm.set_value("repair_cost", doc.rounded_total ? doc.rounded_total : doc.grand_total);
+    });
+  },
+});
+
 function set_asset_details(frm) {
   if (!frm.doc.asset) {
     frm.doc.custom_custodian_name = "";
