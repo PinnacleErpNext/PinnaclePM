@@ -36,6 +36,10 @@ def get_permission_query_conditions(user):
 
     roles = frappe.get_roles(user)
 
+    # System Manager: Full Task access
+    if "System Manager" in roles:
+        return True
+
     base_condition = f"""
         (
             `tabTask`.custom_assigned_to = '{user}'
@@ -90,6 +94,10 @@ def has_permission(doc, user=None):
         return True
 
     roles = frappe.get_roles(user)
+
+    # System Manager: Full Task access
+    if "System Manager" in roles:
+        return True
 
     # UNIVERSAL RULE
     if doc.custom_assigned_to == user or doc.custom_allotted_to == user:
